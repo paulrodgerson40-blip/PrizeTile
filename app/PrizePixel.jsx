@@ -306,38 +306,40 @@ function DrawCycleCountdown() {
   const drawDate = satMillionaire.toLocaleDateString("en-AU",{weekday:"long",day:"numeric",month:"long"});
   return (
     <div style={{ marginBottom:48, position:"relative" }}>
-      <div style={{ background:`linear-gradient(135deg, rgba(0,245,160,0.08) 0%, rgba(73,217,255,0.05) 50%, transparent 100%)`, border:`2px solid ${GOLD}44`, borderRadius:24, padding:"48px 40px", textAlign:"center", position:"relative", overflow:"hidden" }}>
+      <div style={{ background:"rgba(4,8,20,0.88)", border:`1px solid rgba(0,87,255,0.30)`, borderRadius:24, padding:"48px 40px", textAlign:"center", position:"relative", overflow:"hidden", backdropFilter:"blur(20px)", boxShadow:"0 0 120px rgba(0,87,255,0.20), 0 20px 80px rgba(0,0,0,0.6)" }}>
         {/* Background glow */}
-        <div style={{ position:"absolute", top:"50%", left:"50%", transform:"translate(-50%,-50%)", width:700, height:400, background:`radial-gradient(ellipse, ${GOLD}15 0%, transparent 70%)`, pointerEvents:"none" }} />
+        <div style={{ position:"absolute", top:"50%", left:"50%", transform:"translate(-50%,-50%)", width:700, height:400, background:`radial-gradient(ellipse, rgba(0,87,255,0.12) 0%, transparent 70%)`, pointerEvents:"none" }} />
         {/* Next draw label */}
-        <div style={{ fontSize:11, color:GOLD, textTransform:"uppercase", letterSpacing:5, fontWeight:700, marginBottom:20, opacity:0.9, position:"relative" }}>Next Draw</div>
-        {/* Big prize total */}
-        <div style={{ fontSize:"clamp(48px,7vw,88px)", fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", textTransform:"uppercase", color:TEXT, lineHeight:1, marginBottom:4, position:"relative", textShadow:`0 0 60px ${GOLD}44` }}>
+        <div style={{ fontSize:11, color:BLUE_BRIGHT, textTransform:"uppercase", letterSpacing:5, fontWeight:700, marginBottom:20, position:"relative", display:"flex", alignItems:"center", justifyContent:"center", gap:10 }}>
+          <span style={{ color:GOLD }}>✦</span><span>NEXT DRAW</span><span style={{ color:GOLD }}>✦</span>
+        </div>
+        {/* Big prize total — WHITE for maximum impact */}
+        <div style={{ fontSize:"clamp(52px,8vw,96px)", fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", textTransform:"uppercase", color:"#FFFFFF", lineHeight:1, marginBottom:6, position:"relative", textShadow:"0 0 40px rgba(255,255,255,0.25), 0 0 80px rgba(0,87,255,0.4)" }}>
           $6,000,000
         </div>
-        <div style={{ fontSize:"clamp(14px,2vw,22px)", color:GOLD, fontWeight:700, marginBottom:40, letterSpacing:1, position:"relative" }}>
+        <div style={{ fontSize:16, color:GOLD, fontWeight:700, marginBottom:40, letterSpacing:1, position:"relative", fontStyle:"italic" }}>
           in prizes — every month
         </div>
         {/* Countdown */}
-        <div style={{ display:"flex", gap:8, justifyContent:"center", alignItems:"center", marginBottom:40, position:"relative" }}>
+        <div style={{ display:"flex", gap:10, justifyContent:"center", alignItems:"center", marginBottom:40, position:"relative" }}>
           {[{v:cd.d,l:"Days"},{v:cd.h,l:"Hours"},{v:cd.m,l:"Mins"},{v:cd.s,l:"Secs"}].map(({v,l},i)=>(
-            <div key={l} style={{ display:"flex", alignItems:"center", gap:8 }}>
+            <div key={l} style={{ display:"flex", alignItems:"center", gap:10 }}>
               <div style={{ textAlign:"center" }}>
-                <div style={{ background:"rgba(0,245,160,0.06)", border:`1px solid rgba(0,245,160,0.38)`, borderRadius:16, padding:"18px 24px", minWidth:90 }}>
-                  <div style={{ fontSize:"clamp(40px,6vw,68px)", fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif", color:GOLD, lineHeight:1 }}>{pad(v)}</div>
+                <div style={{ background:"rgba(10,20,45,0.80)", border:`1px solid ${GOLD}44`, borderRadius:12, padding:"18px 22px", minWidth:82, boxShadow:`0 0 24px ${GOLD}18`, backdropFilter:"blur(8px)" }}>
+                  <div style={{ fontSize:"clamp(38px,6vw,64px)", fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif", color:GOLD, lineHeight:1 }}>{pad(v)}</div>
                 </div>
-                <div style={{ fontSize:11, color:TEXT3, marginTop:8, textTransform:"uppercase", letterSpacing:2 }}>{l}</div>
+                <div style={{ fontSize:10, color:TEXT2, marginTop:8, textTransform:"uppercase", letterSpacing:2.5, fontWeight:700 }}>{l}</div>
               </div>
-              {i<3 && <div style={{ fontSize:40, color:`${GOLD}44`, fontWeight:900, marginBottom:28 }}>:</div>}
+              {i<3 && <div style={{ fontSize:44, color:`${GOLD}66`, fontWeight:900, marginBottom:28, lineHeight:1 }}>:</div>}
             </div>
           ))}
         </div>
         {/* Date */}
-        <div style={{ fontSize:14, color:TEXT2, marginBottom:28, position:"relative" }}>
-          {drawDate} · 8:00 PM AEST · Drawn Live by Independent Draw Manager
+        <div style={{ fontSize:13, color:TEXT2, marginBottom:28, position:"relative", letterSpacing:0.5 }}>
+          📅 {drawDate} · 8:00 PM AEST · Drawn Live by Independent Draw Manager
         </div>
         {/* Prize pills */}
-        <div style={{ display:"flex", gap:10, justifyContent:"center", flexWrap:"wrap", position:"relative" }}>
+        <div style={{ display:"flex", gap:8, justifyContent:"center", flexWrap:"wrap", position:"relative" }}>
           {[
             { emoji:"💰", label:"$1,000,000 Cash",   color:GOLD },
             { emoji:"🏎️", label:"50 Brand New Cars",  color:BLUE_BRIGHT },
@@ -345,7 +347,7 @@ function DrawCycleCountdown() {
             { emoji:"💻", label:"500 Tech Bundles",    color:STEEL },
             { emoji:"🛒", label:"10,000 Vouchers",     color:BLUE_BRIGHT },
           ].map(p=>(
-            <div key={p.label} style={{ display:"flex", alignItems:"center", gap:6, background:`${p.color}14`, border:`1px solid ${p.color}33`, borderRadius:20, padding:"8px 16px" }}>
+            <div key={p.label} style={{ display:"flex", alignItems:"center", gap:6, background:`${p.color}16`, border:`1px solid ${p.color}40`, borderRadius:20, padding:"8px 16px", backdropFilter:"blur(8px)" }}>
               <span style={{ fontSize:15 }}>{p.emoji}</span>
               <span style={{ fontSize:13, color:p.color, fontWeight:700 }}>{p.label}</span>
             </div>
@@ -386,14 +388,14 @@ function Landing({ onNav }) {
             </div>
           </div>
           <div style={{ marginBottom: 20 }}>
-            <div style={{ fontSize: "clamp(30px, 5vw, 58px)", fontWeight: 900, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic", textTransform: "uppercase", lineHeight: 1, color: TEXT, letterSpacing: -1, marginBottom: 4 }}>
+            <div style={{ fontSize: "clamp(34px, 5.5vw, 66px)", fontWeight: 900, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic", textTransform: "uppercase", lineHeight: 1, color: TEXT, letterSpacing: -2, marginBottom: 6 }}>
               AUSTRALIA'S FIRST
             </div>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 12, background: BLUE_BRIGHT, borderRadius: 6, padding: "6px 24px", marginBottom: 8 }}>
-              <span style={{ fontSize: 14, color: NAVY, fontWeight: 900, fontFamily: "'Arial Black',Arial,sans-serif" }}>✦</span>
-              <span style={{ fontSize: "clamp(28px, 5vw, 52px)", fontWeight: 900, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic", textTransform: "uppercase", color: NAVY, letterSpacing: -1, lineHeight: 1.1 }}>LIVE PRIZE BOARD</span>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 14, background: BLUE_BRIGHT, borderRadius: 6, padding: "8px 28px", marginBottom: 10, boxShadow:`0 0 40px ${BLUE_BRIGHT}66` }}>
+              <span style={{ fontSize: 16, color: NAVY, fontWeight: 900, fontFamily: "'Arial Black',Arial,sans-serif" }}>✦</span>
+              <span style={{ fontSize: "clamp(30px, 5vw, 56px)", fontWeight: 900, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic", textTransform: "uppercase", color: NAVY, letterSpacing: -1, lineHeight: 1.1 }}>LIVE PRIZE BOARD</span>
             </div>
-            <div style={{ fontSize: "clamp(30px, 5vw, 56px)", fontWeight: 900, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic", textTransform: "uppercase", lineHeight: 1, color: TEXT, letterSpacing: -1 }}>
+            <div style={{ fontSize: "clamp(30px, 5vw, 60px)", fontWeight: 900, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic", textTransform: "uppercase", lineHeight: 1, color: TEXT, letterSpacing: -2 }}>
               & MEMBER DRAW ENGINE
             </div>
           </div>
@@ -2332,25 +2334,29 @@ export default function App() {
       <div style={{ position:"fixed", inset:0, pointerEvents:"none", zIndex:0, overflow:"hidden" }}>
         <svg width="100%" height="100%" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <linearGradient id="ray1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#0057FF" stopOpacity="0.18"/><stop offset="100%" stopColor="#0057FF" stopOpacity="0"/></linearGradient>
-            <linearGradient id="ray2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#00C3FF" stopOpacity="0.12"/><stop offset="100%" stopColor="#00C3FF" stopOpacity="0"/></linearGradient>
-            <linearGradient id="ray3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#0057FF" stopOpacity="0.09"/><stop offset="100%" stopColor="#0057FF" stopOpacity="0"/></linearGradient>
-            <radialGradient id="glow1" cx="75%" cy="0%" r="60%"><stop offset="0%" stopColor="#0057FF" stopOpacity="0.20"/><stop offset="100%" stopColor="#03080F" stopOpacity="0"/></radialGradient>
-            <radialGradient id="glow2" cx="20%" cy="100%" r="50%"><stop offset="0%" stopColor="#0057FF" stopOpacity="0.10"/><stop offset="100%" stopColor="#03080F" stopOpacity="0"/></radialGradient>
+            <linearGradient id="ray1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#1060FF" stopOpacity="0.45"/><stop offset="60%" stopColor="#0040CC" stopOpacity="0.15"/><stop offset="100%" stopColor="#0057FF" stopOpacity="0"/></linearGradient>
+            <linearGradient id="ray2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#00C3FF" stopOpacity="0.30"/><stop offset="60%" stopColor="#0080FF" stopOpacity="0.10"/><stop offset="100%" stopColor="#0057FF" stopOpacity="0"/></linearGradient>
+            <linearGradient id="ray3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#0057FF" stopOpacity="0.22"/><stop offset="100%" stopColor="#0057FF" stopOpacity="0"/></linearGradient>
+            <linearGradient id="ray4" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#003AFF" stopOpacity="0.12"/><stop offset="100%" stopColor="#003AFF" stopOpacity="0"/></linearGradient>
+            <radialGradient id="glow1" cx="80%" cy="0%" r="55%"><stop offset="0%" stopColor="#0057FF" stopOpacity="0.30"/><stop offset="100%" stopColor="#03080F" stopOpacity="0"/></radialGradient>
+            <radialGradient id="glow2" cx="15%" cy="105%" r="45%"><stop offset="0%" stopColor="#0040FF" stopOpacity="0.18"/><stop offset="100%" stopColor="#03080F" stopOpacity="0"/></radialGradient>
           </defs>
-          {/* Ambient glows */}
           <rect width="1440" height="900" fill="url(#glow1)"/>
           <rect width="1440" height="900" fill="url(#glow2)"/>
-          {/* Diagonal rays from top-right */}
-          <polygon points="1440,0 1440,300 600,900 400,900" fill="url(#ray1)" opacity="0.9"/>
-          <polygon points="1440,0 1440,150 800,900 680,900" fill="url(#ray2)" opacity="0.8"/>
-          <polygon points="1440,80 1440,220 1000,900 880,900" fill="url(#ray3)" opacity="0.7"/>
-          {/* Left fade-in rays */}
-          <polygon points="0,600 200,900 0,900" fill="url(#ray3)" opacity="0.5"/>
-          {/* Subtle grid lines */}
-          <line x1="0" y1="0" x2="1440" y2="900" stroke="rgba(0,87,255,0.04)" strokeWidth="1"/>
-          <line x1="200" y1="0" x2="1440" y2="720" stroke="rgba(0,87,255,0.03)" strokeWidth="1"/>
-          <line x1="400" y1="0" x2="1440" y2="600" stroke="rgba(0,87,255,0.03)" strokeWidth="1"/>
+          {/* Main bright beam — top right, wide */}
+          <polygon points="1440,0 1440,380 520,900 260,900" fill="url(#ray1)"/>
+          {/* Second beam — tighter, cyan */}
+          <polygon points="1440,0 1440,180 760,900 640,900" fill="url(#ray2)"/>
+          {/* Third beam — narrow accent */}
+          <polygon points="1440,60 1440,240 980,900 880,900" fill="url(#ray3)"/>
+          {/* Fourth beam — very wide, subtle depth */}
+          <polygon points="1440,0 1440,500 200,900 0,900" fill="url(#ray4)"/>
+          {/* Left corner accent */}
+          <polygon points="0,700 180,900 0,900" fill="url(#ray3)" opacity="0.6"/>
+          {/* Edge highlight lines */}
+          <line x1="1440" y1="0" x2="600" y2="900" stroke="rgba(0,195,255,0.12)" strokeWidth="1.5"/>
+          <line x1="1440" y1="0" x2="820" y2="900" stroke="rgba(0,195,255,0.08)" strokeWidth="1"/>
+          <line x1="1440" y1="0" x2="1000" y2="900" stroke="rgba(0,87,255,0.06)" strokeWidth="1"/>
         </svg>
       </div>
       <div style={{ position:"relative", zIndex:1 }}>

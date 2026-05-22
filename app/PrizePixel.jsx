@@ -978,9 +978,10 @@ function LiveDraw({ boardType, onNav, profile, onEditProfile, onDrawStateChange 
     setTilesRevealed(0); setDrawState("idle"); setWinFeed([]); onDrawStateChange?.(false);
     setPrizeState(prizes.map(p => ({ ...p }))); setCurrentPrize(null);
     setGrid(Array.from({ length: GRID_SIZE }, () => ({ state:"pending", prize:null })));
+    setMemberTiles(genTiles(profile.tier, boardType));
     setMemberTileHits({});
     setBoardNum(b => b + 1); setScanLine(0);
-  }, [prizes]);
+  }, [prizes, profile.tier, boardType, onDrawStateChange]);
 
   const triggerWin = useCallback((prize, isMine) => {
     const states = ["NSW","VIC","QLD","SA","WA","TAS","NT","ACT"];
@@ -1003,6 +1004,9 @@ function LiveDraw({ boardType, onNav, profile, onEditProfile, onDrawStateChange 
 
   const runDraw = useCallback(() => {
     if (runningRef.current) return;
+    const freshMemberTiles = genTiles(profile.tier, boardType);
+    setMemberTiles(freshMemberTiles);
+    setMemberTileHits({});
     runningRef.current = true;
     setDrawState("running");
     setCurrentPrize(null);
@@ -1019,8 +1023,20 @@ function LiveDraw({ boardType, onNav, profile, onEditProfile, onDrawStateChange 
     for (const p of localPrizes) for (let i=0; i<p.qty; i++) allP.push({ ...p });
     const prizePositions = buildSpreadPrizePositions(allP, totalTiles);
 
-    const memberTileSet = new Set(memberTiles);
-    const memberWonRef  = { count: 0 }; // track how many prizes member has won this draw
+    const memberTileSet = new Set(freshMemberTiles);
+
+    // Demo safety: force exactly one player-facing prize into the member's tile set
+    // so the bottom player card always demonstrates how a winning tile behaves.
+    // Prize order remains random because the winning member tile and prize type are
+    // selected fresh on every draw.
+    const visiblePrizePool = allP.filter(p => !p.silent);
+    const forcedPlayerPrize = visiblePrizePool[Math.floor(Math.random() * visiblePrizePool.length)] || allP[0];
+    const forcedPlayerTile = freshMemberTiles[Math.floor(Math.random() * freshMemberTiles.length)];
+    if (forcedPlayerTile && forcedPlayerPrize) {
+      prizePositions.set(forcedPlayerTile, { ...forcedPlayerPrize, forcedMine: true });
+    }
+
+    const memberWonRef  = { count: 0, categories: new Set() }; // one player prize per draw, one per category
 
     const revealStep = () => {
       if (!runningRef.current) return;
@@ -1036,13 +1052,19 @@ function LiveDraw({ boardType, onNav, profile, onEditProfile, onDrawStateChange 
           if (pi >= 0) {
             localPrizes[pi].remaining--;
             setPrizeState(localPrizes.map(p => ({ ...p })));
-            // Member tile wins — max 1 prize per draw
-            const isMine = isMemberTile && memberWonRef.count === 0;
+            // Member tile wins — max 1 prize per draw and max 1 per prize category.
+            // In demo mode we deliberately force one member win so the player card shows
+            // a real winning-state tile every draw.
+            const category = prize.name || prize.label;
+            const forcedMine = Boolean(prize.forcedMine);
+            const canWinCategory = !memberWonRef.categories.has(category);
+            const isMine = isMemberTile && memberWonRef.count === 0 && canWinCategory && (forcedMine || Math.random() < 0.03);
             if (isMine) {
               memberWonRef.count++;
+              memberWonRef.categories.add(category);
               setMemberTileHits(h => ({ ...h, [tileNum]: { prize } }));
             } else if (isMemberTile) {
-              // Member tile checked but already won — mark as no prize
+              // Member tile checked but not a prize, or already won one prize this draw.
               setMemberTileHits(h => ({ ...h, [tileNum]: { prize: null } }));
             }
             triggerWin(prize, isMine);
@@ -1076,7 +1098,7 @@ function LiveDraw({ boardType, onNav, profile, onEditProfile, onDrawStateChange 
       setTimeout(revealStep, INTERVAL);
     };
     setTimeout(revealStep, INTERVAL);
-  }, [prizes, totalTiles, triggerWin, stopDraw, memberTiles]);
+  }, [prizes, totalTiles, triggerWin, stopDraw, profile.tier, boardType, onDrawStateChange]);
 
   const simulateWin = useCallback((overridePrize) => {
     const isMine = Math.random()>0.5;
@@ -1867,10 +1889,39 @@ function getActiveTier(tilesSold) {
 function BonusDraw({ onNav, profile, onDrawStateChange }) {
   const safeTierKey = TIERS?.[profile?.tier] ? profile.tier : "gold";
   const tier = TIERS[safeTierKey] || TIERS.gold;
+  const bonusTiles = Number(tier?.bonusTiles || 40);
+  const hasAccess = Boolean(tier?.bonusAccess || safeTierKey === "gold");
+  const voucherTarget = 10000;
+  const demoVoucherTarget = 100;
+  const STATES = ["VIC", "NSW", "QLD", "WA", "SA", "TAS", "ACT", "NT"];
+
+  const makeBonusTiles = useCallback(() => {
+    const base = 805000 + Math.floor(Math.random() * 9000);
+    return Array.from({ length: bonusTiles }, (_, i) => ({
+      id: `B${String(base + i * 137 + Math.floor(Math.random() * 89)).padStart(6, "0")}`,
+      status: "pending",
+      prize: null,
+      revealedOrder: null,
+    }));
+  }, [bonusTiles]);
+
   const [drawState, setDrawState] = useState("ready");
   const [vouchersWon, setVouchersWon] = useState(0);
+  const [revealedCount, setRevealedCount] = useState(0);
+  const [playerWin, setPlayerWin] = useState(null);
+  const [myTiles, setMyTiles] = useState(() => makeBonusTiles());
+  const [winnerRows, setWinnerRows] = useState([]);
   const [liveViewers, setLiveViewers] = useState(() => 4200 + Math.floor(Math.random() * 1800));
   const [boardNum, setBoardNum] = useState(() => 48 + Math.floor(Math.random() * 5));
+  const [sparkTiles, setSparkTiles] = useState(() => new Set());
+  const bonusIntervalRef = useRef(null);
+
+  const clearBonusTimer = useCallback(() => {
+    if (bonusIntervalRef.current) {
+      clearInterval(bonusIntervalRef.current);
+      bonusIntervalRef.current = null;
+    }
+  }, []);
 
   useEffect(() => {
     const iv = setInterval(() => {
@@ -1879,49 +1930,137 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
     return () => clearInterval(iv);
   }, []);
 
-  const bonusTiles = Number(tier?.bonusTiles || 40);
-  const hasAccess = Boolean(tier?.bonusAccess || safeTierKey === "gold");
-  const voucherTarget = 10000;
-  const displayWinCount = Math.min(vouchersWon, 100);
-  const progress = drawState === "ready" ? 0 : Math.min(100, (displayWinCount / 100) * 100);
-
-  const myTiles = Array.from({ length: bonusTiles }, (_, i) => {
-    const n = String(805000 + i * 137 + ((i * 97) % 871)).padStart(6, "0");
-    return {
-      id: `B${n}`,
-      status: i === 2 ? "win" : i < 8 ? "checked" : "pending",
-    };
-  });
-
-  const startDemoDraw = () => {
-    setDrawState("running");
-    onDrawStateChange?.(true);
-    setVouchersWon(0);
-    let i = 0;
-    const iv = setInterval(() => {
-      i += 4 + Math.floor(Math.random() * 5);
-      setVouchersWon(Math.min(i, 100));
-      if (i >= 100) {
-        clearInterval(iv);
-        setDrawState("complete");
-        onDrawStateChange?.(false);
-      }
-    }, 120);
-  };
-
-  const resetDemoDraw = () => {
+  useEffect(() => {
+    clearBonusTimer();
     setDrawState("ready");
     setVouchersWon(0);
+    setRevealedCount(0);
+    setPlayerWin(null);
+    setWinnerRows([]);
+    setMyTiles(makeBonusTiles());
+    setSparkTiles(new Set());
+    onDrawStateChange?.(false);
+    return clearBonusTimer;
+  }, [bonusTiles, makeBonusTiles, clearBonusTimer]);
+
+  const progress = drawState === "ready" ? 0 : Math.min(100, (vouchersWon / demoVoucherTarget) * 100);
+
+  const buildWinner = useCallback((index, mineTileId = null) => ({
+    member: mineTileId ? profile.name : String(70000 + Math.floor(Math.random() * 129000)).padStart(6, "0"),
+    state: mineTileId ? profile.state : STATES[Math.floor(Math.random() * STATES.length)],
+    tile: mineTileId ? mineTileId : String(800000 + Math.floor(Math.random() * 99000)).padStart(7, "0"),
+    isMine: Boolean(mineTileId),
+    ts: new Date().toLocaleTimeString("en-AU", { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
+    index,
+  }), [profile.name, profile.state]);
+
+  const resetDemoDraw = useCallback(() => {
+    clearBonusTimer();
+    setDrawState("ready");
+    setVouchersWon(0);
+    setRevealedCount(0);
+    setPlayerWin(null);
+    setWinnerRows([]);
+    setMyTiles(makeBonusTiles());
+    setSparkTiles(new Set());
     setBoardNum(n => n + 1);
     onDrawStateChange?.(false);
-  };
+  }, [clearBonusTimer, makeBonusTiles, onDrawStateChange]);
 
-  const triggerWin = () => {
+  const startDemoDraw = useCallback(() => {
+    clearBonusTimer();
+    const freshTiles = makeBonusTiles();
+    const order = [...freshTiles.keys()].sort(() => Math.random() - 0.5);
+    const winningOrderIndex = Math.max(2, Math.min(order.length - 1, Math.floor(4 + Math.random() * Math.max(4, order.length * 0.45))));
+    const winningTileIndex = order[winningOrderIndex];
+    const winningTileId = freshTiles[winningTileIndex]?.id;
+
+    setMyTiles(freshTiles);
     setDrawState("running");
+    setVouchersWon(0);
+    setRevealedCount(0);
+    setPlayerWin(null);
+    setWinnerRows([]);
+    setSparkTiles(new Set());
     onDrawStateChange?.(true);
-    setVouchersWon(v => Math.min(100, v + 1));
-    setTimeout(() => onDrawStateChange?.(false), 800);
-  };
+
+    let tick = 0;
+    let voucherCount = 0;
+    let playerAlreadyWon = false;
+
+    bonusIntervalRef.current = setInterval(() => {
+      tick += 1;
+      const step = 3 + Math.floor(Math.random() * 6);
+      voucherCount = Math.min(demoVoucherTarget, voucherCount + step);
+      setVouchersWon(voucherCount);
+
+      // Random board sparkles every tick so the order never feels scripted.
+      const sparks = new Set();
+      for (let i = 0; i < 10; i++) sparks.add(Math.floor(Math.random() * 400));
+      setSparkTiles(sparks);
+
+      setMyTiles(prev => {
+        const next = prev.map(t => ({ ...t }));
+        const revealUpto = Math.min(order.length, tick);
+        for (let j = 0; j < revealUpto; j++) {
+          const idx = order[j];
+          if (!next[idx] || next[idx].status !== "pending") continue;
+          next[idx].status = "checked";
+          next[idx].revealedOrder = j + 1;
+        }
+
+        // Force exactly one player win per Gold Bonus demo draw.
+        if (!playerAlreadyWon && tick >= winningOrderIndex + 1 && next[winningTileIndex]) {
+          next[winningTileIndex].status = "win";
+          next[winningTileIndex].prize = { label: "LMCT+ Partner Voucher", value: "$100" };
+          playerAlreadyWon = true;
+          const mine = buildWinner(voucherCount, winningTileId);
+          setPlayerWin(mine);
+          setWinnerRows(rows => [mine, ...rows].slice(0, 8));
+        }
+        return next;
+      });
+
+      // Add non-player voucher wins randomly to the live feed.
+      if (tick % 2 === 0) {
+        const rowsToAdd = Array.from({ length: 1 + Math.floor(Math.random() * 2) }, (_, i) => buildWinner(voucherCount + i));
+        setWinnerRows(rows => [...rowsToAdd, ...rows].slice(0, 8));
+      }
+
+      setRevealedCount(c => Math.min(bonusTiles, c + 1));
+
+      if (voucherCount >= demoVoucherTarget) {
+        clearBonusTimer();
+        setDrawState("complete");
+        setSparkTiles(new Set());
+        onDrawStateChange?.(false);
+      }
+    }, 135);
+  }, [bonusTiles, buildWinner, clearBonusTimer, makeBonusTiles, onDrawStateChange]);
+
+  const triggerWin = useCallback(() => {
+    if (drawState === "complete") return;
+    if (drawState === "ready") {
+      startDemoDraw();
+      return;
+    }
+    if (playerWin) return;
+    setMyTiles(prev => {
+      const pending = prev.map((t, i) => [t, i]).filter(([t]) => t.status === "pending");
+      const pick = pending[Math.floor(Math.random() * pending.length)] || [prev[0], 0];
+      const idx = pick[1];
+      const next = prev.map(t => ({ ...t }));
+      if (next[idx]) {
+        next[idx].status = "win";
+        next[idx].prize = { label: "LMCT+ Partner Voucher", value: "$100" };
+        const mine = buildWinner(vouchersWon + 1, next[idx].id);
+        setPlayerWin(mine);
+        setWinnerRows(rows => [mine, ...rows].slice(0, 8));
+      }
+      return next;
+    });
+    setVouchersWon(v => Math.min(demoVoucherTarget, v + 1));
+  }, [buildWinner, drawState, playerWin, startDemoDraw, vouchersWon]);
 
   if (!hasAccess) {
     return (
@@ -1935,12 +2074,6 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
       </div>
     );
   }
-
-  const winnerRows = Array.from({ length: Math.min(displayWinCount, 8) }, (_, i) => ({
-    member: String(70000 + i * 37 + boardNum).padStart(6, "0"),
-    state: ["VIC", "NSW", "QLD", "WA", "SA", "TAS", "ACT", "NT"][i % 8],
-    tile: String(800000 + i * 641 + boardNum).padStart(7, "0"),
-  }));
 
   return (
     <div style={{ minHeight:"100vh", color:TEXT }}>
@@ -1976,7 +2109,7 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
           <div>
             <div style={{ background:"rgba(5,14,28,0.96)", border:`1px solid ${BLUE_BORDER}`, borderRadius:14, padding:"16px 20px", marginBottom:16, boxShadow:"0 18px 60px rgba(0,0,0,0.45)" }}>
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:10, gap:12 }}>
-                <span style={{ fontSize:12, color:TEXT2 }}>{drawState === "ready" ? "Gold Bonus Draw ready" : drawState === "complete" ? "Gold Bonus Draw complete" : "Gold Bonus Draw in progress"}</span>
+                <span style={{ fontSize:12, color:TEXT2 }}>{drawState === "ready" ? "Gold Bonus Draw ready — all player tiles reset" : drawState === "complete" ? "Gold Bonus Draw complete" : "Gold Bonus Draw in progress"}</span>
                 <span style={{ fontSize:12, color:BLUE_BRIGHT, fontWeight:900 }}>{progress.toFixed(1)}%</span>
               </div>
               <div style={{ height:6, background:"rgba(255,255,255,0.06)", borderRadius:4, overflow:"hidden" }}>
@@ -1987,10 +2120,10 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
             <div style={{ background:"rgba(1,6,14,0.96)", border:`1px solid rgba(0,195,255,0.18)`, borderRadius:18, padding:16, marginBottom:16, boxShadow:"0 25px 90px rgba(0,0,0,0.65)" }}>
               <div style={{ display:"grid", gridTemplateColumns:"repeat(25,1fr)", gap:3 }}>
                 {Array.from({ length: 400 }, (_, i) => {
-                  const hit = drawState !== "ready" && (i === 42 || i === 133 || i === 268 || (displayWinCount > 40 && i === 311));
-                  const lit = drawState === "running" && i % 37 < 3;
+                  const hit = drawState !== "ready" && (i === 42 || i === 133 || i === 268 || playerWin && i === 311);
+                  const lit = drawState === "running" && sparkTiles.has(i);
                   return (
-                    <div key={i} style={{ aspectRatio:"1", borderRadius:3, background:hit ? BLUE_BRIGHT : lit ? "rgba(0,195,255,0.28)" : "rgba(10,22,42,0.72)", boxShadow:hit ? `0 0 22px ${BLUE_BRIGHT}` : lit ? `0 0 8px ${BLUE_BRIGHT}55` : "none", opacity:drawState === "ready" ? 0.72 : 1 }} />
+                    <div key={i} style={{ aspectRatio:"1", borderRadius:3, background:hit ? BLUE_BRIGHT : lit ? "rgba(0,195,255,0.30)" : "rgba(10,22,42,0.72)", boxShadow:hit ? `0 0 22px ${BLUE_BRIGHT}` : lit ? `0 0 8px ${BLUE_BRIGHT}55` : "none", opacity:drawState === "ready" ? 0.72 : 1, transition:"background 0.12s, box-shadow 0.12s" }} />
                   );
                 })}
               </div>
@@ -2000,20 +2133,23 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
               {drawState === "ready" || drawState === "complete" ? (
                 <button onClick={drawState === "complete" ? resetDemoDraw : startDemoDraw} style={{ background:`linear-gradient(135deg, ${BLUE_BRIGHT}, ${BLUE})`, border:"none", borderRadius:10, padding:"14px 34px", color:TEXT, fontWeight:900, fontSize:16, cursor:"pointer", fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", boxShadow:`0 0 28px rgba(0,195,255,0.32)` }}>{drawState === "complete" ? "⟳ NEW DRAW" : "✦ START GOLD BONUS DRAW"}</button>
               ) : (
-                <button onClick={() => { setDrawState("complete"); onDrawStateChange?.(false); }} style={{ background:"transparent", border:"1px solid rgba(255,80,95,0.38)", borderRadius:10, padding:"14px 28px", color:"#FF6B7B", fontWeight:800, cursor:"pointer" }}>■ Stop</button>
+                <button onClick={() => { clearBonusTimer(); setDrawState("complete"); setSparkTiles(new Set()); onDrawStateChange?.(false); }} style={{ background:"transparent", border:"1px solid rgba(255,80,95,0.38)", borderRadius:10, padding:"14px 28px", color:"#FF6B7B", fontWeight:800, cursor:"pointer" }}>■ Stop</button>
               )}
-              <button onClick={triggerWin} style={{ background:"rgba(5,14,28,0.94)", border:`1px solid ${BLUE_BORDER}`, borderRadius:10, padding:"14px 22px", color:BLUE_BRIGHT, fontWeight:800, cursor:"pointer" }}>✦ Demo: Trigger Win</button>
+              <button onClick={triggerWin} style={{ background:"rgba(5,14,28,0.94)", border:`1px solid ${BLUE_BORDER}`, borderRadius:10, padding:"14px 22px", color:BLUE_BRIGHT, fontWeight:800, cursor:"pointer" }}>✦ Demo: Trigger Player Win</button>
             </div>
 
             <div style={{ background:"rgba(5,14,28,0.96)", border:`1px solid ${BLUE_BORDER}`, borderRadius:16, padding:"18px 20px" }}>
-              <div style={{ fontSize:11, color:BLUE_BRIGHT, textTransform:"uppercase", letterSpacing:2, marginBottom:14, fontWeight:900 }}>My Gold Bonus Tiles — {bonusTiles} allocated</div>
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:12, marginBottom:14 }}>
+                <div style={{ fontSize:11, color:BLUE_BRIGHT, textTransform:"uppercase", letterSpacing:2, fontWeight:900 }}>My Gold Bonus Tiles — {bonusTiles} allocated</div>
+                <div style={{ fontSize:11, color:playerWin ? GREEN : TEXT3, fontWeight:800 }}>{playerWin ? "1 player prize won" : `${revealedCount}/${bonusTiles} checked`}</div>
+              </div>
               <div style={{ display:"flex", flexWrap:"wrap", gap:7 }}>
-                {myTiles.map((t, i) => {
+                {myTiles.map((t) => {
                   const win = t.status === "win";
                   const checked = t.status === "checked";
                   return (
-                    <div key={t.id} style={{ minWidth:win ? 106 : undefined, background:win ? "rgba(0,195,255,0.16)" : checked ? "rgba(255,255,255,0.025)" : "rgba(10,22,42,0.86)", border:`1px solid ${win ? BLUE_BRIGHT : checked ? "rgba(255,255,255,0.06)" : BLUE_BORDER}`, borderRadius:8, padding:win ? "8px 10px" : "6px 10px", color:win ? BLUE_BRIGHT : checked ? TEXT3 : TEXT2, fontSize:11, fontFamily:"monospace", fontWeight:win ? 900 : 700, textDecoration:checked ? "line-through" : "none", boxShadow:win ? `0 0 20px ${BLUE_BRIGHT}55` : "none", textAlign:"center" }}>
-                      {win ? <><div style={{ fontSize:10, textTransform:"uppercase", letterSpacing:1 }}>Winner</div><div>Voucher $100</div><div style={{ opacity:.7 }}>#{t.id}</div></> : <>#{t.id}</>}
+                    <div key={t.id} style={{ minWidth:win ? 116 : undefined, background:win ? "rgba(0,195,255,0.18)" : checked ? "rgba(255,255,255,0.026)" : "rgba(10,22,42,0.92)", border:`1px solid ${win ? BLUE_BRIGHT : checked ? "rgba(255,255,255,0.07)" : BLUE_BORDER}`, borderRadius:8, padding:win ? "8px 10px" : "6px 10px", color:win ? BLUE_BRIGHT : checked ? TEXT3 : TEXT2, fontSize:11, fontFamily:"monospace", fontWeight:win ? 900 : 700, textDecoration:checked ? "line-through" : "none", boxShadow:win ? `0 0 22px ${BLUE_BRIGHT}66` : "none", textAlign:"center", transition:"all 0.2s" }}>
+                      {win ? <><div style={{ fontSize:10, textTransform:"uppercase", letterSpacing:1, color:GREEN }}>Winner</div><div>Voucher $100</div><div style={{ opacity:.75 }}>#{t.id}</div></> : <>#{t.id}</>}
                     </div>
                   );
                 })}
@@ -2027,8 +2163,8 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
               <div style={{ background:"rgba(10,22,42,0.88)", borderRadius:12, padding:"16px" }}>
                 <div style={{ fontSize:15, color:TEXT, fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", marginBottom:3 }}>🛒 LMCT+ Partner Voucher</div>
                 <div style={{ fontSize:12, color:TEXT3, marginBottom:16 }}>$100 value each</div>
-                <div style={{ display:"flex", justifyContent:"space-between", color:TEXT2, fontSize:12, marginBottom:8 }}><span>Won so far</span><strong style={{ color:BLUE_BRIGHT }}>{displayWinCount.toLocaleString()} / {voucherTarget.toLocaleString()}</strong></div>
-                <div style={{ height:5, background:"rgba(255,255,255,0.06)", borderRadius:3, overflow:"hidden" }}><div style={{ height:"100%", width:`${(displayWinCount / 100) * 100}%`, background:`linear-gradient(90deg, ${BLUE_BRIGHT}, ${GREEN})` }} /></div>
+                <div style={{ display:"flex", justifyContent:"space-between", color:TEXT2, fontSize:12, marginBottom:8 }}><span>Won so far</span><strong style={{ color:BLUE_BRIGHT }}>{vouchersWon.toLocaleString()} / {voucherTarget.toLocaleString()}</strong></div>
+                <div style={{ height:5, background:"rgba(255,255,255,0.06)", borderRadius:3, overflow:"hidden" }}><div style={{ height:"100%", width:`${progress}%`, background:`linear-gradient(90deg, ${BLUE_BRIGHT}, ${GREEN})` }} /></div>
               </div>
             </div>
 
@@ -2039,9 +2175,9 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
               ) : (
                 <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
                   {winnerRows.map((w, i) => (
-                    <div key={w.tile} style={{ background:"rgba(10,22,42,0.86)", borderLeft:`3px solid ${BLUE_BRIGHT}`, borderRadius:"0 10px 10px 0", padding:"9px 12px" }}>
-                      <div style={{ color:BLUE_BRIGHT, fontSize:12, fontWeight:900 }}>🛒 Partner Voucher · $100</div>
-                      <div style={{ color:TEXT3, fontSize:10, marginTop:3 }}>Gold #{w.member} · {w.state} · tile #{w.tile}</div>
+                    <div key={`${w.tile}-${i}`} style={{ background:w.isMine ? "rgba(0,195,255,0.13)" : "rgba(10,22,42,0.86)", borderLeft:`3px solid ${w.isMine ? GREEN : BLUE_BRIGHT}`, borderRadius:"0 10px 10px 0", padding:"9px 12px", boxShadow:w.isMine ? `0 0 18px ${BLUE_BRIGHT}33` : "none" }}>
+                      <div style={{ color:w.isMine ? GREEN : BLUE_BRIGHT, fontSize:12, fontWeight:900 }}>{w.isMine ? "🎉 YOUR TILE WON" : "🛒 Partner Voucher · $100"}</div>
+                      <div style={{ color:TEXT3, fontSize:10, marginTop:3 }}>{w.isMine ? profile.name : `Gold #${w.member}`} · {w.state} · tile #{w.tile} · {w.ts}</div>
                     </div>
                   ))}
                 </div>
@@ -2051,7 +2187,7 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
         </div>
 
         <div style={{ marginTop:18, background:"rgba(5,14,28,0.90)", border:`1px solid ${BLUE_BORDER}`, borderRadius:12, padding:"12px 16px", color:TEXT3, fontSize:12 }}>
-          Demo mode — simplified, stable Gold Bonus Board for presentation. Production draw would process all 10,000 voucher wins server-side and push live events to each member browser.
+          Demo mode — player tiles reset at the start of every draw, prize order is randomised, and the member is forced to win one voucher so the tile-card behaviour is visible. Production would process all voucher wins server-side and push live events to each member browser.
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 
-// ─── PRIZETILE RENDER-STYLE LUX PALETTE ─────────────────────────────────────
+// ─── PRIZETILE RENDER-STYLE LUX PALETTE — CLEAN FOREGROUND ─────────────────────────────────────
 const BLUE        = "#126BFF";          // electric royal blue
 const BLUE_BRIGHT = "#27D8FF";          // cyan glow
 const BLUE_SOFT   = "#62A8FF";
@@ -8,10 +8,10 @@ const BLUE_DIM    = "rgba(18,107,255,0.14)";
 const BLUE_BORDER = "rgba(39,216,255,0.30)";
 const NAVY        = "#02060D";          // deep black navy
 const NAVY2       = "#050B16";
-const NAVY3       = "rgba(8,17,34,0.78)";          // glass card
-const NAVY4       = "rgba(12,25,47,0.78)";         // inner glass
-const BORDER      = "rgba(72,167,255,0.16)";
-const BORDER2     = "rgba(39,216,255,0.28)";
+const NAVY3       = "rgba(5,12,26,0.96)";          // solid lux card — prevents background bleed
+const NAVY4       = "rgba(8,18,36,0.97)";         // solid inner card
+const BORDER      = "rgba(72,167,255,0.22)";
+const BORDER2     = "rgba(39,216,255,0.34)";
 const SILVER      = "#DCEBFF";
 const TEXT        = "#FFFFFF";
 const TEXT2       = "rgba(220,235,255,0.76)";
@@ -135,7 +135,7 @@ function LmctLogo({ height = 38 }) {
 function BlueBtn({ children, onClick, outline, small, full }) {
   return (
     <button onClick={onClick} style={{
-      background: outline ? "rgba(5,12,26,0.40)" : `linear-gradient(135deg, ${BLUE_BRIGHT} 0%, ${BLUE} 58%, #0B4DFF 100%)`,
+      background: outline ? "rgba(5,12,26,0.82)" : `linear-gradient(135deg, ${BLUE_BRIGHT} 0%, ${BLUE} 58%, #0B4DFF 100%)`,
       color: TEXT,
       border: outline ? `1.5px solid rgba(98,168,255,0.58)` : `1px solid rgba(39,216,255,0.75)`,
       borderRadius: 10,
@@ -197,7 +197,7 @@ function NavBar({ page, onNav, drawActive }) {
     { id: "members", label: "Winners" },
   ];
   return (
-    <div style={{ background:"rgba(2,6,13,0.86)", backdropFilter:"blur(22px)", borderBottom:`1px solid rgba(98,168,255,0.22)`, boxShadow:"0 1px 0 rgba(39,216,255,0.10), 0 14px 40px rgba(0,0,0,0.28)", display:"flex", alignItems:"center", padding:"0 30px", height:70, position:"sticky", top:0, zIndex:200 }}>
+    <div style={{ background:"rgba(2,6,13,0.97)", backdropFilter:"blur(22px)", borderBottom:`1px solid rgba(98,168,255,0.22)`, boxShadow:"0 1px 0 rgba(39,216,255,0.10), 0 14px 40px rgba(0,0,0,0.28)", display:"flex", alignItems:"center", padding:"0 30px", height:70, position:"sticky", top:0, zIndex:200 }}>
       <button onClick={() => onNav("home")} style={{ background:"transparent", border:"none", cursor:"pointer", marginRight:46, padding:0, lineHeight:0 }}>
         <LmctLogo height={40} />
       </button>
@@ -218,7 +218,7 @@ function NavBar({ page, onNav, drawActive }) {
           );
         })}
       </div>
-      <button onClick={() => onNav("draw")} style={{ display:"flex", alignItems:"center", gap:9, background:"rgba(5,15,32,0.70)", border:"1px solid rgba(39,216,255,0.48)", borderRadius:12, padding:"10px 18px", cursor:"pointer", boxShadow:`inset 0 0 18px rgba(18,107,255,.18), 0 0 22px rgba(18,107,255,.20)` }}>
+      <button onClick={() => onNav("draw")} style={{ display:"flex", alignItems:"center", gap:9, background:"rgba(5,15,32,0.94)", border:"1px solid rgba(39,216,255,0.48)", borderRadius:12, padding:"10px 18px", cursor:"pointer", boxShadow:`inset 0 0 18px rgba(18,107,255,.18), 0 0 22px rgba(18,107,255,.20)` }}>
         <span style={{ width:8, height:8, borderRadius:"50%", background:drawActive?GREEN:"#FF2E4D", display:"inline-block", animation:"blink 1.5s ease-in-out infinite", boxShadow:drawActive?"0 0 10px #00F5A0":"0 0 10px #FF2E4D" }} />
         <span style={{ fontSize:12, color:BLUE_BRIGHT, fontWeight:900, textTransform:"uppercase", letterSpacing:1.8, fontFamily:"'Arial Black',Arial,sans-serif" }}>PRIZETILE DEMO</span>
       </button>
@@ -286,7 +286,7 @@ function DrawCycleBar() {
   const cd = useCountdown(nextDraw);
   const p = n => String(n??0).padStart(2,"0");
   return (
-    <div style={{ background: "rgba(0,102,255,0.06)", borderBottom:`1px solid ${BORDER}`, padding:"7px 24px", display:"flex", alignItems:"center", gap:16, flexWrap:"wrap" }}>
+    <div style={{ background: "rgba(3,10,24,0.92)", borderBottom:`1px solid ${BORDER}`, padding:"7px 24px", display:"flex", alignItems:"center", gap:16, flexWrap:"wrap" }}>
       <div style={{ display:"flex", gap:5, alignItems:"center" }}>
         {[1,2,3,4].map(w=>(
           <div key={w} style={{ display:"flex", alignItems:"center", gap:4 }}>
@@ -315,8 +315,8 @@ function DrawCycleCountdown() {
   const drawDate = satMillionaire.toLocaleDateString("en-AU",{weekday:"long",day:"numeric",month:"long"});
   return (
     <div style={{ margin:"0 auto 56px", maxWidth:860, position:"relative" }}>
-      <div style={{ background:"linear-gradient(180deg, rgba(10,28,58,0.72), rgba(3,10,24,0.88))", border:`1.5px solid rgba(39,216,255,0.55)`, borderRadius:22, padding:"36px 34px 28px", textAlign:"center", position:"relative", overflow:"hidden", backdropFilter:"blur(22px)", boxShadow:"0 0 55px rgba(18,107,255,0.22), inset 0 0 60px rgba(39,216,255,0.05), 0 26px 90px rgba(0,0,0,0.62)" }}>
-        <div style={{ position:"absolute", inset:0, background:"radial-gradient(circle at 50% 8%, rgba(39,216,255,.16), transparent 35%), linear-gradient(135deg, rgba(18,107,255,.10), transparent 45%, rgba(39,216,255,.08))", pointerEvents:"none" }} />
+      <div style={{ background:"linear-gradient(180deg, rgba(7,18,38,0.97), rgba(3,10,24,0.99))", border:`1.5px solid rgba(39,216,255,0.55)`, borderRadius:22, padding:"36px 34px 28px", textAlign:"center", position:"relative", overflow:"hidden", backdropFilter:"blur(22px)", boxShadow:"0 0 55px rgba(18,107,255,0.22), inset 0 0 60px rgba(39,216,255,0.05), 0 26px 90px rgba(0,0,0,0.62)" }}>
+        <div style={{ position:"absolute", inset:0, background:"radial-gradient(circle at 50% 8%, rgba(39,216,255,.10), transparent 35%), linear-gradient(135deg, rgba(18,107,255,.07), transparent 45%, rgba(39,216,255,.04))", pointerEvents:"none" }} />
         <div style={{ fontSize:11, color:BLUE_BRIGHT, textTransform:"uppercase", letterSpacing:5, fontWeight:900, marginBottom:18, position:"relative", display:"flex", alignItems:"center", justifyContent:"center", gap:10 }}>
           <span style={{ color:BLUE_BRIGHT }}>✦</span><span>NEXT DRAW</span><span style={{ color:BLUE_BRIGHT }}>✦</span>
         </div>
@@ -330,7 +330,7 @@ function DrawCycleCountdown() {
           {[{v:cd.d,l:"Days"},{v:cd.h,l:"Hours"},{v:cd.m,l:"Mins"},{v:cd.s,l:"Secs"}].map(({v,l},i)=>(
             <div key={l} style={{ display:"flex", alignItems:"center", gap:12 }}>
               <div style={{ textAlign:"center" }}>
-                <div style={{ background:"rgba(3,12,28,0.74)", border:`1px solid rgba(98,168,255,0.42)`, borderRadius:12, padding:"14px 20px", minWidth:96, boxShadow:`inset 0 0 22px rgba(39,216,255,0.08), 0 0 22px rgba(18,107,255,0.18)`, backdropFilter:"blur(10px)" }}>
+                <div style={{ background:"rgba(3,12,28,0.94)", border:`1px solid rgba(98,168,255,0.42)`, borderRadius:12, padding:"14px 20px", minWidth:96, boxShadow:`inset 0 0 22px rgba(39,216,255,0.08), 0 0 22px rgba(18,107,255,0.18)`, backdropFilter:"blur(10px)" }}>
                   <div style={{ fontSize:"clamp(38px,5vw,58px)", fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif", color:BLUE_BRIGHT, lineHeight:1, textShadow:"0 0 18px rgba(39,216,255,.55)" }}>{pad(v)}</div>
                 </div>
                 <div style={{ fontSize:10, color:"rgba(220,235,255,0.68)", marginTop:8, textTransform:"uppercase", letterSpacing:2.5, fontWeight:700 }}>{l}</div>
@@ -415,7 +415,7 @@ function Landing({ onNav }) {
             { val: "50 Cars",     label: "Given away in a single night — every month", sub: "Plus 100 holidays · 10,000 vouchers",   accent: "#FFFFFF" },
             { val: "$1,000,000",  label: "Gold exclusive bonus draw — same night",   sub: "Gold members only · 10,000 vouchers", accent: GREEN },
           ].map(s => (
-            <div key={s.label} style={{ background: "rgba(8,17,34,0.64)", border: `1px solid rgba(98,168,255,0.20)`, borderRadius: 18, padding: "26px 24px", textAlign: "center", backdropFilter:"blur(18px)", boxShadow:"inset 0 0 35px rgba(39,216,255,.04), 0 18px 55px rgba(0,0,0,.32)" }}>
+            <div key={s.label} style={{ background: "rgba(5,12,26,0.95)", border: `1px solid rgba(98,168,255,0.20)`, borderRadius: 18, padding: "26px 24px", textAlign: "center", backdropFilter:"blur(18px)", boxShadow:"inset 0 0 35px rgba(39,216,255,.04), 0 18px 55px rgba(0,0,0,.32)" }}>
               <div style={{ fontSize: "clamp(28px,4vw,44px)", fontWeight: 900, color: s.accent, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic", lineHeight: 1, marginBottom: 8, textShadow:`0 0 18px ${s.accent}44` }}>{s.val}</div>
               <div style={{ fontSize: 13, color: TEXT2, lineHeight: 1.5, marginBottom: 6 }}>{s.label}</div>
               <div style={{ fontSize: 10, color: s.accent, textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 700, opacity: 0.75 }}>{s.sub}</div>
@@ -434,7 +434,7 @@ function Landing({ onNav }) {
               { tier: "Silver", price: "$59.99/mo", tiles: 40, color: "#DCEBFF", tagline: "4× more chances every draw" },
               { tier: "Gold",   price: "$109.99/mo",tiles: 100, color: BLUE_BRIGHT, tagline: "10× tiles + exclusive $1M Bonus Draw" },
             ].map(t => (
-              <div key={t.tier} style={{ background: "rgba(8,17,34,0.70)", border: `1.5px solid ${t.color}44`, borderRadius: 18, padding: "30px 24px", textAlign: "center", boxShadow: `0 0 34px ${t.color}18`, backdropFilter:"blur(18px)" }}>
+              <div key={t.tier} style={{ background: "rgba(5,12,26,0.95)", border: `1.5px solid ${t.color}44`, borderRadius: 18, padding: "30px 24px", textAlign: "center", boxShadow: `0 0 34px ${t.color}18`, backdropFilter:"blur(18px)" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 16 }}>
                   <div style={{ width: 10, height: 10, borderRadius: "50%", background: t.color, boxShadow:`0 0 12px ${t.color}` }} />
                   <span style={{ fontSize: 12, fontWeight: 900, color: t.color, textTransform: "uppercase", letterSpacing: 2.5, fontFamily: "'Arial Black',Arial,sans-serif" }}>{t.tier}</span>
@@ -456,7 +456,7 @@ function Landing({ onNav }) {
             Every month on a Saturday night, LMCT+ gives away <strong style={{ color: BLUE_BRIGHT }}>$5,000,000 in prizes</strong>. Gold members also compete in an exclusive <strong style={{ color: GREEN }}>$1,000,000 bonus draw</strong> the same night.
           </p>
           <div style={{ display: "grid", gridTemplateColumns:"1.3fr .9fr", gap: 18 }}>
-            <div style={{ background: "rgba(8,17,34,0.68)", border: `1.5px solid ${BLUE_BORDER}`, borderRadius: 18, overflow: "hidden", boxShadow: `0 0 42px rgba(18,107,255,0.16)`, backdropFilter:"blur(18px)" }}>
+            <div style={{ background: "rgba(5,12,26,0.95)", border: `1.5px solid ${BLUE_BORDER}`, borderRadius: 18, overflow: "hidden", boxShadow: `0 0 42px rgba(18,107,255,0.16)`, backdropFilter:"blur(18px)" }}>
               <div style={{ background: "linear-gradient(90deg, rgba(18,107,255,0.22), rgba(39,216,255,0.10))", borderBottom: `1px solid ${BLUE_BORDER}`, padding: "18px 26px" }}>
                 <div style={{ fontSize: 11, color: BLUE_BRIGHT, textTransform: "uppercase", letterSpacing: 2.5, fontWeight: 900, marginBottom: 4 }}>Every Month — Saturday Night</div>
                 <div style={{ fontSize: 24, fontWeight: 900, color: TEXT, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic" }}>Monthly Millionaire Draw</div>
@@ -475,7 +475,7 @@ function Landing({ onNav }) {
                 ))}
               </div>
             </div>
-            <div style={{ background: "rgba(8,17,34,0.68)", border: `1.5px solid ${GREEN_BORDER}`, borderRadius: 18, overflow: "hidden", boxShadow: "0 0 42px rgba(0,245,160,0.12)", backdropFilter:"blur(18px)" }}>
+            <div style={{ background: "rgba(5,12,26,0.95)", border: `1.5px solid ${GREEN_BORDER}`, borderRadius: 18, overflow: "hidden", boxShadow: "0 0 42px rgba(0,245,160,0.12)", backdropFilter:"blur(18px)" }}>
               <div style={{ background: "linear-gradient(90deg, rgba(0,245,160,0.18), rgba(39,216,255,0.08))", borderBottom: `1px solid ${GREEN_BORDER}`, padding: "18px 24px" }}>
                 <div style={{ fontSize: 11, color: GREEN, textTransform: "uppercase", letterSpacing: 2.3, fontWeight: 900, marginBottom: 5 }}>Gold Members Only</div>
                 <div style={{ fontSize: 23, fontWeight: 900, color: TEXT, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic" }}>$1,000,000 Bonus Draw</div>
@@ -497,7 +497,7 @@ function Landing({ onNav }) {
               { n: "3", title: "Watch Live", desc: "The board reveals live with prize flashes, pauses and winner moments." },
               { n: "4", title: "Win", desc: "Prizes are paid to verified members and results remain replayable." },
             ].map(s => (
-              <div key={s.n} style={{ background: "rgba(8,17,34,0.70)", border: `1px solid ${BORDER}`, borderRadius: 16, padding: "28px 22px", position: "relative", overflow: "hidden", backdropFilter:"blur(16px)" }}>
+              <div key={s.n} style={{ background: "rgba(5,12,26,0.95)", border: `1px solid ${BORDER}`, borderRadius: 16, padding: "28px 22px", position: "relative", overflow: "hidden", backdropFilter:"blur(16px)" }}>
                 <div style={{ position: "absolute", top: -8, right: 10, fontSize: 64, fontWeight: 900, color: BLUE_DIM, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic", lineHeight: 1, pointerEvents: "none" }}>{s.n}</div>
                 <div style={{ fontSize: 15, fontWeight: 900, color: TEXT, marginBottom: 10, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic", textTransform: "uppercase", position: "relative" }}>{s.title}</div>
                 <div style={{ fontSize: 14, color: TEXT2, lineHeight: 1.65, position: "relative" }}>{s.desc}</div>
@@ -523,14 +523,14 @@ function TierCards({ onNav }) {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 20, marginBottom: 60 }}>
           {Object.entries(TIERS).map(([key, tier]) => (
             <div key={key} style={{
-              background: key === "gold" ? "rgba(10,18,30,0.95)" : "rgba(8,14,26,0.80)",
+              background: key === "gold" ? "rgba(5,14,28,0.98)" : "rgba(5,12,26,0.97)",
               border: key === "gold" ? `2px solid ${GOLD}55` : `1px solid ${BORDER}`,
               borderRadius: 16, padding:"36px 32px", position:"relative", overflow:"hidden",
               boxShadow: key === "gold" ? `0 0 60px rgba(39,216,255,0.13), 0 0 120px rgba(0,87,255,0.08)` : `0 0 40px rgba(0,87,255,0.06)`,
               backdropFilter:"blur(10px)",
             }}>
               {key === "gold" && (
-                <div style={{ position:"absolute", top:0, right:0, background:`linear-gradient(135deg,${GOLD},#27D8FF)`, color:"#000", fontSize:11, fontWeight:900, padding:"7px 22px 7px 32px", clipPath:"polygon(18px 0,100% 0,100% 100%,0 100%)", fontFamily:"'Arial Black',Arial,sans-serif", letterSpacing:1.5 }}>MOST POPULAR</div>
+                <div style={{ position:"absolute", top:0, right:0, background:`linear-gradient(135deg,${BLUE_BRIGHT},${BLUE_SOFT})`, color:"#000", fontSize:11, fontWeight:900, padding:"7px 22px 7px 32px", clipPath:"polygon(18px 0,100% 0,100% 100%,0 100%)", fontFamily:"'Arial Black',Arial,sans-serif", letterSpacing:1.5 }}>MOST POPULAR</div>
               )}
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
                 <div style={{ width: 14, height: 14, borderRadius: "50%", background: tier.color, boxShadow: `0 0 10px ${tier.glow}` }} />
@@ -566,14 +566,14 @@ function TierCards({ onNav }) {
 
 
         {/* Gold Bonus Draw callout */}
-        <div style={{ background:"linear-gradient(135deg, rgba(11,99,255,0.10), rgba(0,245,160,0.055))", border:"1px solid rgba(73,217,255,0.28)", borderRadius:18, overflow:"hidden", marginBottom:24 }}>
-          <div style={{ background:"linear-gradient(90deg, rgba(73,217,255,0.12), rgba(0,245,160,0.08))", borderBottom:"1px solid rgba(73,217,255,0.22)", padding:"18px 28px", display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:12 }}>
+        <div style={{ background:"linear-gradient(135deg, rgba(5,14,30,0.98), rgba(6,20,36,0.98))", border:"1px solid rgba(73,217,255,0.28)", borderRadius:18, overflow:"hidden", marginBottom:24 }}>
+          <div style={{ background:"linear-gradient(90deg, rgba(9,28,54,0.98), rgba(5,18,34,0.98))", borderBottom:"1px solid rgba(73,217,255,0.22)", padding:"18px 28px", display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:12 }}>
             <div>
               <div style={{ fontSize:11, color:CHAMPAGNE, textTransform:"uppercase", letterSpacing:2.5, fontWeight:700, marginBottom:4 }}>Every Month — Gold Members Only</div>
               <div style={{ fontSize:22, fontWeight:900, color:TEXT, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic" }}>$1,000,000 Gold Bonus Draw</div>
               <div style={{ fontSize:13, color:TEXT2, marginTop:4 }}>10,000 LMCT+ Partner Vouchers — Gold members only. Included with your Gold subscription. No extra payment ever required.</div>
             </div>
-            <div style={{ background:"rgba(0,245,160,0.12)", border:"1px solid rgba(0,245,160,0.25)", borderRadius:14, padding:"14px 28px", textAlign:"center", flexShrink:0 }}>
+            <div style={{ background:"rgba(6,20,34,0.96)", border:"1px solid rgba(0,245,160,0.25)", borderRadius:14, padding:"14px 28px", textAlign:"center", flexShrink:0 }}>
               <div style={{ fontSize:10, color:CHAMPAGNE, textTransform:"uppercase", letterSpacing:1, marginBottom:4 }}>Prize Pool</div>
               <div style={{ fontSize:28, fontWeight:900, color:CHAMPAGNE, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic" }}>$1,000,000</div>
               <div style={{ fontSize:10, color:TEXT3, marginTop:2 }}>Gold members only · every month</div>
@@ -586,7 +586,7 @@ function TierCards({ onNav }) {
               <div style={{ fontSize:13, color:TEXT3, marginTop:4 }}>10,000 winners — $100 each · Every Gold member has a meaningful chance of winning their membership back every month</div>
             </div>
           </div>
-          <div style={{ padding:"12px 28px", borderTop:`1px solid ${BORDER}`, background:"rgba(0,245,160,0.05)", display:"flex", alignItems:"center", gap:10 }}>
+          <div style={{ padding:"12px 28px", borderTop:`1px solid ${BORDER}`, background:"rgba(3,12,24,0.96)", display:"flex", alignItems:"center", gap:10 }}>
             <span style={{ fontSize:13 }}>★</span>
             <span style={{ fontSize:12, color:CHAMPAGNE, fontWeight:700 }}>Gold members only · 40 bonus tiles · Upgrade to Gold to access this exclusive monthly draw</span>
           </div>
@@ -603,7 +603,7 @@ function TierCards({ onNav }) {
               </div>
             </div>
           </div>
-          <div style={{ background:"rgba(127,145,173,0.08)", border:"1px solid rgba(127,145,173,0.24)", borderRadius:16, padding:"22px 24px", display:"flex", gap:14, alignItems:"flex-start" }}>
+          <div style={{ background:"rgba(6,14,28,0.96)", border:"1px solid rgba(127,145,173,0.24)", borderRadius:16, padding:"22px 24px", display:"flex", gap:14, alignItems:"flex-start" }}>
             <span style={{ fontSize:28, flexShrink:0 }}>₿</span>
             <div>
               <div style={{ fontSize:15, fontWeight:900, color:STEEL, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", marginBottom:8 }}>Crypto Payments Supported</div>
@@ -612,7 +612,7 @@ function TierCards({ onNav }) {
               </div>
               <div style={{ display:"flex", gap:8, marginTop:12, flexWrap:"wrap" }}>
                 {["₿ Bitcoin","Ξ Ethereum","₮ USDT"].map(c=>(
-                  <div key={c} style={{ background:"rgba(127,145,173,0.10)", border:"1px solid rgba(127,145,173,0.30)", borderRadius:20, padding:"4px 14px", fontSize:12, fontWeight:700, color:STEEL }}>{c}</div>
+                  <div key={c} style={{ background:"rgba(10,22,40,0.96)", border:"1px solid rgba(127,145,173,0.30)", borderRadius:20, padding:"4px 14px", fontSize:12, fontWeight:700, color:STEEL }}>{c}</div>
                 ))}
               </div>
               <div style={{ marginTop:12, fontSize:11, color:"rgba(185,199,216,0.60)", display:"flex", gap:6, alignItems:"center" }}>
@@ -1267,14 +1267,14 @@ function LiveDraw({ boardType, onNav, profile, onEditProfile, onDrawStateChange 
 
       {/* Sub-nav */}
       <DrawCycleBar />
-      <div style={{ background:"rgba(10,15,30,0.9)", backdropFilter:"blur(12px)", borderBottom:`1px solid ${BORDER}`, padding:"10px 24px", display:"flex", alignItems:"center", gap:12, flexWrap:"wrap" }}>
+      <div style={{ background:"rgba(6,12,24,0.97)", backdropFilter:"blur(12px)", borderBottom:`1px solid ${BORDER}`, padding:"10px 24px", display:"flex", alignItems:"center", gap:12, flexWrap:"wrap" }}>
         <button onClick={()=>onNav("home")} style={{ background:"transparent", border:`1px solid ${BORDER2}`, borderRadius:6, padding:"6px 14px", color:TEXT2, cursor:"pointer", fontSize:13 }}>← Back</button>
         <div style={{ display:"flex", gap:8 }}>
           <GhostBtn active={boardType==="monthly"} onClick={()=>onNav("draw-monthly")}>◆ Monthly Millionaire</GhostBtn>
-          <button onClick={()=>onNav("bonus")} style={{ background:"rgba(0,245,160,0.06)", border:`1px solid rgba(0,245,160,0.38)`, borderRadius:8, padding:"8px 18px", color:GOLD, fontSize:14, fontWeight:700, cursor:"pointer" }}>★ Gold Bonus Draw</button>
+          <button onClick={()=>onNav("bonus")} style={{ background:"rgba(4,14,26,0.94)", border:`1px solid rgba(0,245,160,0.38)`, borderRadius:8, padding:"8px 18px", color:GOLD, fontSize:14, fontWeight:700, cursor:"pointer" }}>★ Gold Bonus Draw</button>
         </div>
         <div style={{ marginLeft:"auto", display:"flex", gap:10, alignItems:"center" }}>
-          <div style={{ display:"flex", alignItems:"center", gap:6, background:"rgba(73,217,255,0.08)", border:"1px solid rgba(73,217,255,0.18)", borderRadius:20, padding:"4px 12px" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:6, background:"rgba(5,14,28,0.94)", border:"1px solid rgba(73,217,255,0.18)", borderRadius:20, padding:"4px 12px" }}>
             <div style={{ width:6, height:6, borderRadius:"50%", background:BLUE_BRIGHT, animation:"livePulse 1.5s ease-in-out infinite" }} />
             <span style={{ fontSize:12, color:BLUE_BRIGHT, fontWeight:700 }}>{liveViewers.toLocaleString()} watching</span>
           </div>
@@ -1430,7 +1430,7 @@ function LiveDraw({ boardType, onNav, profile, onEditProfile, onDrawStateChange 
             </div>
 
             {/* Demo note */}
-            <div style={{ background:"rgba(0,102,255,0.05)", border:`1px solid ${BLUE_BORDER}`, borderRadius:10, padding:"10px 16px", marginBottom:14, display:"flex", gap:10, alignItems:"center" }}>
+            <div style={{ background:"rgba(4,12,26,0.94)", border:`1px solid ${BLUE_BORDER}`, borderRadius:10, padding:"10px 16px", marginBottom:14, display:"flex", gap:10, alignItems:"center" }}>
               <span style={{ fontSize:14 }}>ℹ️</span>
               <div style={{ fontSize:11, color:TEXT3 }}>
                 <strong style={{color:TEXT2}}>Demo mode</strong> — prize quantities reduced for presentation speed (~2 min).
@@ -1495,7 +1495,7 @@ function LiveDraw({ boardType, onNav, profile, onEditProfile, onDrawStateChange 
                     <div style={{ fontSize:10, color:TEXT3, textTransform:"uppercase", letterSpacing:1 }}>Revealed</div>
                   </div>
                   {myWinCount>0 && (
-                    <div style={{ textAlign:"center", background:"rgba(73,217,255,0.08)", border:"1px solid rgba(0,230,118,0.25)", borderRadius:10, padding:"10px 16px" }}>
+                    <div style={{ textAlign:"center", background:"rgba(5,14,28,0.94)", border:"1px solid rgba(0,230,118,0.25)", borderRadius:10, padding:"10px 16px" }}>
                       <div style={{ fontSize:24, fontWeight:900, color:BLUE_BRIGHT, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic" }}>{fmtMoney(myWinTotal)}</div>
                       <div style={{ fontSize:10, color:TEXT3, textTransform:"uppercase", letterSpacing:1 }}>Won!</div>
                     </div>
@@ -1747,7 +1747,7 @@ function WinnersPage({ onNav }) {
 
         {/* Draw tab selector */}
         <div style={{ display:"flex", gap:10, marginBottom:28 }}>
-          <div style={{ flex:1, background:"rgba(0,245,160,0.06)", border:`2px solid ${GOLD}66`, borderRadius:12, padding:"14px 20px" }}>
+          <div style={{ flex:1, background:"rgba(4,14,26,0.94)", border:`2px solid ${GOLD}66`, borderRadius:12, padding:"14px 20px" }}>
             <div style={{ fontSize:10, color:GOLD, textTransform:"uppercase", letterSpacing:2, fontWeight:700, marginBottom:4 }}>Every Month — Saturday Night</div>
             <div style={{ fontSize:16, fontWeight:900, color:TEXT, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic" }}>Monthly Millionaire Draw</div>
             <div style={{ fontSize:12, color:TEXT3, marginTop:2 }}>50 cars · 100 holidays · $1,000,000 cash · 10,000+ winners</div>
@@ -2017,14 +2017,14 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
       <style>{`@keyframes bonusGlow { 0%,100%{box-shadow:0 0 20px ${GOLD}44} 50%{box-shadow:0 0 50px ${GOLD}88,0 0 80px ${GOLD}44} }`}</style>
 
       {/* Sub-nav */}
-      <div style={{ background:"rgba(10,15,30,0.95)", backdropFilter:"blur(12px)", borderBottom:`1px solid ${BLUE_BORDER}`, padding:"10px 24px", display:"flex", alignItems:"center", gap:12, flexWrap:"wrap" }}>
+      <div style={{ background:"rgba(6,12,24,0.98)", backdropFilter:"blur(12px)", borderBottom:`1px solid ${BLUE_BORDER}`, padding:"10px 24px", display:"flex", alignItems:"center", gap:12, flexWrap:"wrap" }}>
         <button onClick={() => onNav("draw")} style={{ background:"transparent", border:`1px solid ${BORDER2}`, borderRadius:6, padding:"6px 14px", color:TEXT2, cursor:"pointer", fontSize:13 }}>← Main Draw</button>
-        <div style={{ display:"flex", alignItems:"center", gap:8, background:"rgba(0,245,160,0.06)", border:`1px solid rgba(0,245,160,0.38)`, borderRadius:20, padding:"6px 16px" }}>
+        <div style={{ display:"flex", alignItems:"center", gap:8, background:"rgba(4,14,26,0.94)", border:`1px solid rgba(0,245,160,0.38)`, borderRadius:20, padding:"6px 16px" }}>
           <span style={{ fontSize:14 }}>★</span>
           <span style={{ fontSize:13, color:GOLD, fontWeight:700, textTransform:"uppercase", letterSpacing:1.5 }}>$1M Gold Bonus Draw</span>
         </div>
         <div style={{ marginLeft:"auto", display:"flex", gap:10, alignItems:"center" }}>
-          <div style={{ display:"flex", alignItems:"center", gap:6, background:"rgba(73,217,255,0.08)", border:"1px solid rgba(73,217,255,0.18)", borderRadius:20, padding:"4px 12px" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:6, background:"rgba(5,14,28,0.94)", border:"1px solid rgba(73,217,255,0.18)", borderRadius:20, padding:"4px 12px" }}>
             <div style={{ width:6, height:6, borderRadius:"50%", background:BLUE_BRIGHT, animation:"livePulse 1.5s ease-in-out infinite" }} />
             <span style={{ fontSize:12, color:BLUE_BRIGHT, fontWeight:700 }}>{liveViewers.toLocaleString()} watching</span>
           </div>
@@ -2075,7 +2075,7 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
                   )}
                 </div>
                 <div style={{ display:"flex", gap:8, alignItems:"center" }}>
-                  <span style={{ background:"rgba(0,245,160,0.075)", border:`1px solid rgba(0,245,160,0.38)`, borderRadius:10, padding:"2px 8px", fontSize:10, color:GOLD, fontWeight:700 }}>DEMO MODE</span>
+                  <span style={{ background:"rgba(4,14,26,0.95)", border:`1px solid rgba(0,245,160,0.38)`, borderRadius:10, padding:"2px 8px", fontSize:10, color:GOLD, fontWeight:700 }}>DEMO MODE</span>
                   <span style={{ color:TEXT3, fontSize:12 }}>{pct.toFixed(1)}%</span>
                 </div>
               </div>
@@ -2115,14 +2115,14 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
               ) : (
                 <button onClick={stopDraw} style={{ background:"transparent", color:"#FF6060", border:"2px solid #FF606044", borderRadius:8, padding:"14px 32px", fontWeight:700, fontSize:15, cursor:"pointer" }}>■ Stop</button>
               )}
-              <button onClick={() => { simulateWin(); setDemoPickerOpen(false); }} style={{ background:"rgba(0,245,160,0.075)", color:GOLD, border:`1px solid rgba(0,245,160,0.38)`, borderRadius:8, padding:"14px 22px", fontWeight:700, fontSize:15, cursor:"pointer" }}>
+              <button onClick={() => { simulateWin(); setDemoPickerOpen(false); }} style={{ background:"rgba(4,14,26,0.95)", color:GOLD, border:`1px solid rgba(0,245,160,0.38)`, borderRadius:8, padding:"14px 22px", fontWeight:700, fontSize:15, cursor:"pointer" }}>
                 ✦ DEMO: TRIGGER WIN
               </button>
               {drawState !== "idle" && <button onClick={resetDraw} style={{ background:"transparent", color:TEXT2, border:`1px solid ${BORDER}`, borderRadius:8, padding:"14px 24px", fontSize:15, cursor:"pointer" }}>Reset</button>}
             </div>
 
             {/* Demo note */}
-            <div style={{ background:"rgba(0,245,160,0.04)", border:`1px solid rgba(73,217,255,0.22)`, borderRadius:10, padding:"10px 16px", marginBottom:14, display:"flex", gap:10, alignItems:"center" }}>
+            <div style={{ background:"rgba(3,10,22,0.94)", border:`1px solid rgba(73,217,255,0.22)`, borderRadius:10, padding:"10px 16px", marginBottom:14, display:"flex", gap:10, alignItems:"center" }}>
               <span style={{ fontSize:14 }}>ℹ️</span>
               <div style={{ fontSize:11, color:TEXT3 }}>
                 <strong style={{color:TEXT2}}>Demo mode</strong> — showing 100 voucher winners (~1 min). 
@@ -2247,7 +2247,7 @@ export default function App() {
   const boardType = page.includes("monthly") ? "monthly" : "weekly";
 
   return (
-    <div style={{ fontFamily:"Arial, sans-serif", background:"radial-gradient(circle at 50% -15%, rgba(18,107,255,.18), transparent 34%), linear-gradient(180deg,#02060D 0%, #050B16 46%, #02060D 100%)", minHeight:"100vh", position:"relative", overflowX:"hidden" }}>
+    <div style={{ fontFamily:"Arial, sans-serif", background:"radial-gradient(circle at 50% -18%, rgba(18,107,255,.10), transparent 34%), linear-gradient(180deg,#02060D 0%, #041020 48%, #02060D 100%)", minHeight:"100vh", position:"relative", overflowX:"hidden" }}>
       <style>{`
         * { box-sizing:border-box; margin:0; padding:0; }
         button { font-family:inherit; }
@@ -2265,12 +2265,12 @@ export default function App() {
       <div style={{ position:"fixed", inset:0, pointerEvents:"none", zIndex:0, overflow:"hidden" }}>
         <svg width="100%" height="100%" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <linearGradient id="ray1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#1060FF" stopOpacity="0.45"/><stop offset="60%" stopColor="#0040CC" stopOpacity="0.15"/><stop offset="100%" stopColor="#0057FF" stopOpacity="0"/></linearGradient>
-            <linearGradient id="ray2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#00C3FF" stopOpacity="0.30"/><stop offset="60%" stopColor="#0080FF" stopOpacity="0.10"/><stop offset="100%" stopColor="#0057FF" stopOpacity="0"/></linearGradient>
-            <linearGradient id="ray3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#0057FF" stopOpacity="0.22"/><stop offset="100%" stopColor="#0057FF" stopOpacity="0"/></linearGradient>
-            <linearGradient id="ray4" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#003AFF" stopOpacity="0.12"/><stop offset="100%" stopColor="#003AFF" stopOpacity="0"/></linearGradient>
-            <radialGradient id="glow1" cx="80%" cy="0%" r="55%"><stop offset="0%" stopColor="#0057FF" stopOpacity="0.30"/><stop offset="100%" stopColor="#03080F" stopOpacity="0"/></radialGradient>
-            <radialGradient id="glow2" cx="15%" cy="105%" r="45%"><stop offset="0%" stopColor="#0040FF" stopOpacity="0.18"/><stop offset="100%" stopColor="#03080F" stopOpacity="0"/></radialGradient>
+            <linearGradient id="ray1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#1060FF" stopOpacity="0.08"/><stop offset="60%" stopColor="#0040CC" stopOpacity="0.06"/><stop offset="100%" stopColor="#0057FF" stopOpacity="0"/></linearGradient>
+            <linearGradient id="ray2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#00C3FF" stopOpacity="0.13"/><stop offset="60%" stopColor="#0080FF" stopOpacity="0.04"/><stop offset="100%" stopColor="#0057FF" stopOpacity="0"/></linearGradient>
+            <linearGradient id="ray3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#0057FF" stopOpacity="0.09"/><stop offset="100%" stopColor="#0057FF" stopOpacity="0"/></linearGradient>
+            <linearGradient id="ray4" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#003AFF" stopOpacity="0.04"/><stop offset="100%" stopColor="#003AFF" stopOpacity="0"/></linearGradient>
+            <radialGradient id="glow1" cx="80%" cy="0%" r="55%"><stop offset="0%" stopColor="#0057FF" stopOpacity="0.13"/><stop offset="100%" stopColor="#03080F" stopOpacity="0"/></radialGradient>
+            <radialGradient id="glow2" cx="15%" cy="105%" r="45%"><stop offset="0%" stopColor="#0040FF" stopOpacity="0.08"/><stop offset="100%" stopColor="#03080F" stopOpacity="0"/></radialGradient>
           </defs>
           <rect width="1440" height="900" fill="url(#glow1)"/>
           <rect width="1440" height="900" fill="url(#glow2)"/>
@@ -2283,12 +2283,13 @@ export default function App() {
           {/* Fourth beam — very wide, subtle depth */}
           <polygon points="1440,0 1440,500 200,900 0,900" fill="url(#ray4)"/>
           {/* Left corner accent */}
-          <polygon points="0,700 180,900 0,900" fill="url(#ray3)" opacity="0.6"/>
+          <polygon points="0,700 180,900 0,900" fill="url(#ray3)" opacity="0.28"/>
           {/* Edge highlight lines */}
-          <line x1="1440" y1="0" x2="600" y2="900" stroke="rgba(0,195,255,0.12)" strokeWidth="1.5"/>
-          <line x1="1440" y1="0" x2="820" y2="900" stroke="rgba(0,195,255,0.08)" strokeWidth="1"/>
-          <line x1="1440" y1="0" x2="1000" y2="900" stroke="rgba(0,87,255,0.06)" strokeWidth="1"/>
+          <line x1="1440" y1="0" x2="600" y2="900" stroke="rgba(0,195,255,0.045)" strokeWidth="1.5"/>
+          <line x1="1440" y1="0" x2="820" y2="900" stroke="rgba(0,195,255,0.035)" strokeWidth="1"/>
+          <line x1="1440" y1="0" x2="1000" y2="900" stroke="rgba(0,87,255,0.025)" strokeWidth="1"/>
         </svg>
+        <div style={{ position:"absolute", inset:0, background:"linear-gradient(180deg, rgba(2,6,13,0.18), rgba(2,6,13,0.42))" }} />
       </div>
       <div style={{ position:"relative", zIndex:1 }}>
       {editingProfile && <ProfileEditor profile={profile} onSave={p=>{setProfile(p);setEditingProfile(false);}} onClose={()=>setEditingProfile(false)} />}

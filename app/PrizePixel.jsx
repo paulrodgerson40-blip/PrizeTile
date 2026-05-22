@@ -2967,15 +2967,14 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
   const tier = TIERS[profile?.tier] || TIERS.elite;
 
   // Stable bonus tile IDs — generated once on mount, never change
-  const [myBonusTiles] = useState(() =>
+  const makeBonusTiles = () =>
     tier.bonusAccess
       ? Array.from({ length: tier.bonusTiles }, (_, i) => ({
           id: `B${String(Math.floor(Math.random() * 999999) + 1).padStart(6,"0")}`,
-          // Pre-reveal some tiles for demo: first 8 = checked (no prize), tile #3 = winner
           status: i === 2 ? "win" : i < 8 ? "checked" : "pending",
         }))
-      : []
-  );
+      : [];
+  const [myBonusTiles, setMyBonusTiles] = useState(makeBonusTiles);
 
   const [prizeState, setPrizeState]   = useState(() => BONUS_PRIZES.map(p => ({ ...p })));
   const [liveViewers, setLiveViewers] = useState(() => 3200 + Math.floor(Math.random()*1800));
@@ -3021,7 +3020,9 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
     setGrid(Array.from({ length: GRID_SIZE }, () => ({ state:"pending", prize:null })));
     setBoardNum(b => b + 1);
     setScanLine(0);
-  }, []);
+    // Reset member tiles — fresh tile IDs and statuses for new draw
+    setMyBonusTiles(makeBonusTiles());
+  }, [tier.bonusTiles]);
 
   const triggerWin = useCallback((prize) => {
     const states = ["NSW","VIC","QLD","SA","WA","TAS","NT","ACT"];

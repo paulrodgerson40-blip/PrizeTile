@@ -1971,9 +1971,11 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
     clearBonusTimer();
     const freshTiles = makeBonusTiles();
     const order = [...freshTiles.keys()].sort(() => Math.random() - 0.5);
-    const winningOrderIndex = Math.max(2, Math.min(order.length - 1, Math.floor(4 + Math.random() * Math.max(4, order.length * 0.45))));
-    const winningTileIndex = order[winningOrderIndex];
+    // Keep the Gold Bonus demo running long enough to feel live.
+    // The player's forced win now lands mid-draw rather than immediately.
+    const winningTileIndex = order[Math.floor(Math.random() * order.length)];
     const winningTileId = freshTiles[winningTileIndex]?.id;
+    const forcedWinTick = 24 + Math.floor(Math.random() * 32);
 
     setMyTiles(freshTiles);
     setDrawState("running");
@@ -1990,27 +1992,30 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
 
     bonusIntervalRef.current = setInterval(() => {
       tick += 1;
-      const step = 3 + Math.floor(Math.random() * 6);
+      // Slower bonus-board pacing for presentation: about 35–45 seconds.
+      const step = tick % 5 === 0 ? 2 : 1;
       voucherCount = Math.min(demoVoucherTarget, voucherCount + step);
       setVouchersWon(voucherCount);
 
       // Random board sparkles every tick so the order never feels scripted.
       const sparks = new Set();
-      for (let i = 0; i < 10; i++) sparks.add(Math.floor(Math.random() * 400));
+      for (let i = 0; i < 6; i++) sparks.add(Math.floor(Math.random() * 400));
       setSparkTiles(sparks);
 
       setMyTiles(prev => {
         const next = prev.map(t => ({ ...t }));
+        // The bonus card stays face-down/clean during the scan.
+        // Only the actual winning player tile flips, so the card is not cluttered
+        // with dimmed/struck-out tiles during or after the demo draw.
         const revealUpto = Math.min(order.length, tick);
         for (let j = 0; j < revealUpto; j++) {
           const idx = order[j];
           if (!next[idx] || next[idx].status !== "pending") continue;
-          next[idx].status = "checked";
           next[idx].revealedOrder = j + 1;
         }
 
         // Force exactly one player win per Gold Bonus demo draw.
-        if (!playerAlreadyWon && tick >= winningOrderIndex + 1 && next[winningTileIndex]) {
+        if (!playerAlreadyWon && tick >= forcedWinTick && next[winningTileIndex]) {
           next[winningTileIndex].status = "win";
           next[winningTileIndex].prize = { label: "LMCT+ Partner Voucher", value: "$100" };
           playerAlreadyWon = true;
@@ -2022,8 +2027,8 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
       });
 
       // Add non-player voucher wins randomly to the live feed.
-      if (tick % 2 === 0) {
-        const rowsToAdd = Array.from({ length: 1 + Math.floor(Math.random() * 2) }, (_, i) => buildWinner(voucherCount + i));
+      if (tick % 4 === 0) {
+        const rowsToAdd = Array.from({ length: 1 }, (_, i) => buildWinner(voucherCount + i));
         setWinnerRows(rows => [...rowsToAdd, ...rows].slice(0, 8));
       }
 
@@ -2035,7 +2040,7 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
         setSparkTiles(new Set());
         onDrawStateChange?.(false);
       }
-    }, 135);
+    }, 450);
   }, [bonusTiles, buildWinner, clearBonusTimer, makeBonusTiles, onDrawStateChange]);
 
   const triggerWin = useCallback(() => {
@@ -2146,9 +2151,9 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
               <div style={{ display:"flex", flexWrap:"wrap", gap:7 }}>
                 {myTiles.map((t) => {
                   const win = t.status === "win";
-                  const checked = t.status === "checked";
+                  const scanned = t.revealedOrder && !win;
                   return (
-                    <div key={t.id} style={{ minWidth:win ? 116 : undefined, background:win ? "rgba(0,195,255,0.18)" : checked ? "rgba(255,255,255,0.026)" : "rgba(10,22,42,0.92)", border:`1px solid ${win ? BLUE_BRIGHT : checked ? "rgba(255,255,255,0.07)" : BLUE_BORDER}`, borderRadius:8, padding:win ? "8px 10px" : "6px 10px", color:win ? BLUE_BRIGHT : checked ? TEXT3 : TEXT2, fontSize:11, fontFamily:"monospace", fontWeight:win ? 900 : 700, textDecoration:checked ? "line-through" : "none", boxShadow:win ? `0 0 22px ${BLUE_BRIGHT}66` : "none", textAlign:"center", transition:"all 0.2s" }}>
+                    <div key={t.id} style={{ minWidth:win ? 116 : undefined, background:win ? "rgba(0,195,255,0.18)" : "rgba(10,22,42,0.92)", border:`1px solid ${win ? BLUE_BRIGHT : scanned ? "rgba(0,195,255,0.18)" : BLUE_BORDER}`, borderRadius:8, padding:win ? "8px 10px" : "6px 10px", color:win ? BLUE_BRIGHT : TEXT2, fontSize:11, fontFamily:"monospace", fontWeight:win ? 900 : 700, textDecoration:"none", boxShadow:win ? `0 0 22px ${BLUE_BRIGHT}66` : scanned ? "inset 0 0 0 1px rgba(0,195,255,0.05)" : "none", textAlign:"center", transition:"all 0.2s" }}>
                       {win ? <><div style={{ fontSize:10, textTransform:"uppercase", letterSpacing:1, color:GREEN }}>Winner</div><div>Voucher $100</div><div style={{ opacity:.75 }}>#{t.id}</div></> : <>#{t.id}</>}
                     </div>
                   );
@@ -2187,7 +2192,7 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
         </div>
 
         <div style={{ marginTop:18, background:"rgba(5,14,28,0.90)", border:`1px solid ${BLUE_BORDER}`, borderRadius:12, padding:"12px 16px", color:TEXT3, fontSize:12 }}>
-          Demo mode — player tiles reset at the start of every draw, prize order is randomised, and the member is forced to win one voucher so the tile-card behaviour is visible. Production would process all voucher wins server-side and push live events to each member browser.
+          Demo mode — Gold Bonus runs slower for presentation, player tiles reset cleanly at the start of every draw, only the winning player tile flips, and the member is forced to win one voucher so the tile-card behaviour is visible. Production would process all voucher wins server-side and push live events to each member browser.
         </div>
       </div>
     </div>

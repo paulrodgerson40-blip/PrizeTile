@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description:
     "PrizeTile is a live monthly prize engine built for the next generation of promotional membership.",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/favicon.svg",
   },
 };
 

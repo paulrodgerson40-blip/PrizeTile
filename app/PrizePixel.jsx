@@ -1,28 +1,28 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 
-// ─── PRIZETILE PREMIUM DEMO TOKENS ─────────────────────────────────────────
-// Refined dark performance palette for a sleeker LMCT+ proposal demo
-const BLUE       = "#0B63FF";          // premium electric blue
-const BLUE_BRIGHT= "#49D9FF";          // refined cyan accent
-const BLUE_DIM   = "rgba(11,99,255,0.13)";
-const BLUE_BORDER= "rgba(73,217,255,0.28)";
-const NAVY       = "#050912";          // near-black performance navy
-const NAVY2      = "#070D19";
-const NAVY3      = "#0B1324";          // premium card background
-const NAVY4      = "#111A2C";
-const BORDER     = "rgba(120,155,205,0.16)";
-const BORDER2    = "rgba(73,217,255,0.22)";
-const SILVER     = "#B9C7D8";
-const TEXT       = "#F7FAFF";
-const TEXT2      = "rgba(232,240,255,0.68)";
-const TEXT3      = "rgba(232,240,255,0.38)";
-const GOLD       = "#00F5A0";          // electric emerald accent for Gold tier — no muddy gold/brown
-const CHAMPAGNE  = "#7CFFE1";          // luminous mint highlight
-const STEEL      = "#9BADCA";
-const BRONZE     = "#6FA8FF";          // cool blue-steel for Bronze tier to avoid brown/orange
-const GREEN      = "#00F5A0";
-const GREEN_DIM  = "rgba(0,245,160,0.10)";
-const GREEN_BORDER = "rgba(0,245,160,0.30)";
+// ─── PRIZETILE ELITE PALETTE ─────────────────────────────────────────────────
+const BLUE        = "#0057FF";          // electric royal blue — broadcast energy
+const BLUE_BRIGHT = "#00C3FF";          // cyan — tile hits, accents
+const BLUE_DIM    = "rgba(0,87,255,0.14)";
+const BLUE_BORDER = "rgba(0,195,255,0.28)";
+const NAVY        = "#03080F";          // near-black — deepest background
+const NAVY2       = "#060C17";
+const NAVY3       = "#0A1221";          // card background
+const NAVY4       = "#0E1A2E";          // inner card
+const BORDER      = "rgba(0,195,255,0.12)";
+const BORDER2     = "rgba(0,195,255,0.22)";
+const SILVER      = "#C0D4F0";
+const TEXT        = "#FFFFFF";
+const TEXT2       = "rgba(200,225,255,0.70)";
+const TEXT3       = "rgba(160,195,240,0.42)";
+const GOLD        = "#FFD700";          // true gold — premium, cash prizes
+const CHAMPAGNE   = "#FFE97A";          // light gold highlight
+const STEEL       = "#8BA5CC";
+const BRONZE      = "#CD9B4A";          // warm bronze for Bronze tier
+const GREEN       = "#00E676";
+const GREEN_DIM   = "rgba(0,230,118,0.10)";
+const GREEN_BORDER= "rgba(0,230,118,0.28)";
+const RAY_COLOR   = "rgba(0,87,255,0.07)";  // diagonal beam colour
 
 const TIERS = {
   bronze: { name: "Bronze", price: 29.99,  weeklyTiles: 10,  monthlyTiles: 10,  bonusTiles: 0,  bonusAccess: false, poolPct: 30, color: BRONZE, accent: "#B9D0FF", glow: "rgba(111,168,255,0.18)" },
@@ -187,25 +187,32 @@ function NavBar({ page, onNav, drawActive }) {
     { id: "members", label: "Winners" },
   ];
   return (
-    <div style={{ background: "rgba(10,15,30,0.95)", backdropFilter: "blur(12px)", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", padding: "0 28px", height: 64, position: "sticky", top: 0, zIndex: 200 }}>
-      <button onClick={() => onNav("home")} style={{ background: "transparent", border: "none", cursor: "pointer", marginRight: 32, padding: 0, lineHeight: 0 }}>
-        <LmctLogo height={38} />
+    <div style={{ background:"rgba(3,8,15,0.92)", backdropFilter:"blur(20px)", borderBottom:`1px solid rgba(0,87,255,0.25)`, boxShadow:"0 1px 0 rgba(0,195,255,0.08)", display:"flex", alignItems:"center", padding:"0 32px", height:66, position:"sticky", top:0, zIndex:200 }}>
+      <button onClick={() => onNav("home")} style={{ background:"transparent", border:"none", cursor:"pointer", marginRight:36, padding:0, lineHeight:0 }}>
+        <LmctLogo height={40} />
       </button>
-      <div style={{ display: "flex", gap: 4, flex: 1 }}>
-        {links.map(l => (
-          <button key={l.id} onClick={() => onNav(l.id)} style={{
-            background: "transparent", border: "none", padding: "8px 16px",
-            color: page.startsWith(l.id) ? BLUE_BRIGHT : TEXT2,
-            fontSize: 14, fontWeight: page.startsWith(l.id) ? 700 : 400,
-            cursor: "pointer", fontStyle: page.startsWith(l.id) ? "italic" : "normal",
-            borderBottom: page.startsWith(l.id) ? `2px solid ${BLUE}` : "2px solid transparent",
-          }}>{l.label}</button>
-        ))}
+      <div style={{ display:"flex", gap:2, flex:1 }}>
+        {links.map(l => {
+          const active = page.startsWith(l.id);
+          return (
+            <button key={l.id} onClick={() => onNav(l.id)} style={{
+              background:"transparent", border:"none", padding:"8px 18px",
+              color: active ? "#FFFFFF" : TEXT2,
+              fontSize:14, fontWeight: active ? 700 : 400,
+              cursor:"pointer", letterSpacing: active ? 0.5 : 0,
+              position:"relative",
+              transition:"color 0.2s",
+            }}>
+              {l.label}
+              {active && <span style={{ position:"absolute", bottom:0, left:"50%", transform:"translateX(-50%)", width:"60%", height:2, background:`linear-gradient(90deg,${BLUE},${BLUE_BRIGHT})`, borderRadius:2, display:"block" }} />}
+            </button>
+          );
+        })}
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, background: BLUE_DIM, border: `1px solid ${BLUE_BORDER}`, borderRadius: 20, padding: "6px 14px" }}>
-        <span style={{ width: 7, height: 7, borderRadius: "50%", background: drawActive ? BLUE_BRIGHT : "#E31E24", display: "inline-block", animation: "blink 2s ease-in-out infinite" }} />
-        <span style={{ fontSize: 12, color: BLUE_BRIGHT, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.5 }}>PrizeTile Demo</span>
-      </div>
+      <button onClick={() => onNav("draw")} style={{ display:"flex", alignItems:"center", gap:8, background:`linear-gradient(135deg,${BLUE},#0040CC)`, border:"none", borderRadius:8, padding:"9px 18px", cursor:"pointer", boxShadow:`0 0 20px rgba(0,87,255,0.4)` }}>
+        <span style={{ width:7, height:7, borderRadius:"50%", background:drawActive?"#00FF88":"#FF3344", display:"inline-block", animation:"blink 1.5s ease-in-out infinite", boxShadow:drawActive?"0 0 8px #00FF88":"0 0 8px #FF3344" }} />
+        <span style={{ fontSize:12, color:"#FFFFFF", fontWeight:900, textTransform:"uppercase", letterSpacing:1.5, fontFamily:"'Arial Black',Arial,sans-serif" }}>PRIZETILE DEMO</span>
+      </button>
     </div>
   );
 }
@@ -362,8 +369,8 @@ function CryptoBadge({ small }) {
 
 function Landing({ onNav }) {
   return (
-    <div style={{ background: `radial-gradient(ellipse at 60% 0%, #0D2040 0%, ${NAVY} 60%)`, minHeight: "100vh" }}>
-      <div style={{ maxWidth: 1000, margin: "0 auto", padding: "80px 28px 64px" }}>
+    <div style={{ minHeight:"100vh" }}>
+      <div style={{ maxWidth:1060, margin:"0 auto", padding:"72px 32px 80px" }}>
 
         {/* Hero */}
         <div style={{ textAlign: "center", marginBottom: 80 }}>
@@ -574,7 +581,7 @@ function Landing({ onNav }) {
 // ─── TIERS ────────────────────────────────────────────────────────────────────
 function TierCards({ onNav }) {
   return (
-    <div style={{ background: `radial-gradient(ellipse at 50% 0%, #0D2040 0%, ${NAVY} 70%)`, minHeight: "100vh", padding: "64px 28px" }}>
+    <div style={{ minHeight:"100vh", padding:"64px 28px" }}>
       <div style={{ maxWidth: 960, margin: "0 auto" }}>
         <div style={{ marginBottom: 56 }}>
           <SectionHead>Membership Tiers</SectionHead>
@@ -584,13 +591,14 @@ function TierCards({ onNav }) {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 20, marginBottom: 60 }}>
           {Object.entries(TIERS).map(([key, tier]) => (
             <div key={key} style={{
-              background: NAVY3,
-              border: `${key === "elite" ? "2px" : "1px"} solid ${key === "elite" ? tier.color + "66" : BORDER}`,
-              borderRadius: 20, padding: "36px 32px", position: "relative", overflow: "hidden",
-              boxShadow: key === "elite" ? `0 0 40px ${tier.glow}` : "none",
+              background: key === "gold" ? "rgba(10,18,30,0.95)" : "rgba(8,14,26,0.80)",
+              border: key === "gold" ? `2px solid ${GOLD}55` : `1px solid ${BORDER}`,
+              borderRadius: 16, padding:"36px 32px", position:"relative", overflow:"hidden",
+              boxShadow: key === "gold" ? `0 0 60px rgba(255,215,0,0.12), 0 0 120px rgba(0,87,255,0.08)` : `0 0 40px rgba(0,87,255,0.06)`,
+              backdropFilter:"blur(10px)",
             }}>
-              {key === "elite" && (
-                <div style={{ position: "absolute", top: 0, right: 0, background: `linear-gradient(135deg, ${GREEN}, ${BLUE_BRIGHT})`, color: "#000", fontSize: 11, fontWeight: 900, padding: "6px 20px 6px 30px", clipPath: "polygon(16px 0,100% 0,100% 100%,0 100%)", fontFamily: "'Arial Black',Arial,sans-serif", letterSpacing: 1 }}>TOP TIER</div>
+              {key === "gold" && (
+                <div style={{ position:"absolute", top:0, right:0, background:`linear-gradient(135deg,${GOLD},#FFA500)`, color:"#000", fontSize:11, fontWeight:900, padding:"7px 22px 7px 32px", clipPath:"polygon(18px 0,100% 0,100% 100%,0 100%)", fontFamily:"'Arial Black',Arial,sans-serif", letterSpacing:1.5 }}>MOST POPULAR</div>
               )}
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
                 <div style={{ width: 14, height: 14, borderRadius: "50%", background: tier.color, boxShadow: `0 0 10px ${tier.glow}` }} />
@@ -1158,7 +1166,7 @@ function LiveDraw({ boardType, onNav, profile, onEditProfile, onDrawStateChange 
   const isMillionaire = currentPrize?.value >= 1000000;
 
   return (
-    <div style={{ background:`radial-gradient(ellipse at 50% 0%, #0D2040 0%, ${NAVY} 70%)`, minHeight:"100vh", color:TEXT }}>
+    <div style={{ background:"transparent", minHeight:"100vh", color:TEXT }}>
       <style>{`
         @keyframes tileFlip {
           0%  { transform:scaleY(1); opacity:1; }
@@ -1794,7 +1802,7 @@ function WinnersPage({ onNav }) {
   const drawDate  = "Saturday 17 May 2025";
 
   return (
-    <div style={{ background:`radial-gradient(ellipse at 50% 0%, #0D2040 0%, ${NAVY} 70%)`, minHeight:"100vh", padding:"56px 28px" }}>
+    <div style={{ minHeight:"100vh", padding:"56px 28px" }}>
       <div style={{ maxWidth:960, margin:"0 auto" }}>
 
         {/* Header */}
@@ -2056,7 +2064,7 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
 
   if (!tier.bonusAccess) {
     return (
-      <div style={{ background:`radial-gradient(ellipse at 50% 0%, #08213D 0%, #050912 70%)`, minHeight:"100vh", color:TEXT, display:"flex", alignItems:"center", justifyContent:"center" }}>
+      <div style={{ background:"transparent", minHeight:"100vh", color:TEXT, display:"flex", alignItems:"center", justifyContent:"center" }}>
         <div style={{ textAlign:"center", maxWidth:480, padding:40 }}>
           <div style={{ fontSize:48, marginBottom:20 }}>★</div>
           <div style={{ fontSize:28, fontWeight:900, color:GOLD, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", marginBottom:16 }}>Gold Members Only</div>
@@ -2073,7 +2081,7 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
   }
 
   return (
-    <div style={{ background:`radial-gradient(ellipse at 50% 0%, #08213D 0%, #050912 70%)`, minHeight:"100vh", color:TEXT }}>
+    <div style={{ background:"transparent", minHeight:"100vh", color:TEXT }}>
       <style>{`@keyframes bonusGlow { 0%,100%{box-shadow:0 0 20px ${GOLD}44} 50%{box-shadow:0 0 50px ${GOLD}88,0 0 80px ${GOLD}44} }`}</style>
 
       {/* Sub-nav */}
@@ -2307,17 +2315,45 @@ export default function App() {
   const boardType = page.includes("monthly") ? "monthly" : "weekly";
 
   return (
-    <div style={{ fontFamily:"Arial, sans-serif", background:NAVY, minHeight:"100vh" }}>
+    <div style={{ fontFamily:"Arial, sans-serif", background:NAVY, minHeight:"100vh", position:"relative", overflowX:"hidden" }}>
       <style>{`
         * { box-sizing:border-box; margin:0; padding:0; }
         button { font-family:inherit; }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-        ::-webkit-scrollbar { width:8px; }
-        ::-webkit-scrollbar-track { background:rgba(255,255,255,0.04); border-radius:4px; }
-        ::-webkit-scrollbar-thumb { background:rgba(0,102,255,0.5); border-radius:4px; }
-        ::-webkit-scrollbar-thumb:hover { background:rgba(0,195,255,0.8); }
-        input:focus { border-color: rgba(43,159,232,0.6) !important; box-shadow: 0 0 0 2px rgba(43,159,232,0.15); }
+        @keyframes shimmer { 0%{opacity:0.5} 50%{opacity:1} 100%{opacity:0.5} }
+        @keyframes countFlip { 0%{transform:translateY(-4px);opacity:0} 100%{transform:translateY(0);opacity:1} }
+        ::-webkit-scrollbar { width:6px; }
+        ::-webkit-scrollbar-track { background:rgba(0,0,0,0.3); }
+        ::-webkit-scrollbar-thumb { background:rgba(0,87,255,0.5); border-radius:3px; }
+        ::-webkit-scrollbar-thumb:hover { background:rgba(0,195,255,0.7); }
+        input:focus { border-color:rgba(0,195,255,0.5) !important; box-shadow:0 0 0 2px rgba(0,195,255,0.12); }
       `}</style>
+      {/* Global diagonal beam background */}
+      <div style={{ position:"fixed", inset:0, pointerEvents:"none", zIndex:0, overflow:"hidden" }}>
+        <svg width="100%" height="100%" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="ray1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#0057FF" stopOpacity="0.18"/><stop offset="100%" stopColor="#0057FF" stopOpacity="0"/></linearGradient>
+            <linearGradient id="ray2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#00C3FF" stopOpacity="0.12"/><stop offset="100%" stopColor="#00C3FF" stopOpacity="0"/></linearGradient>
+            <linearGradient id="ray3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#0057FF" stopOpacity="0.09"/><stop offset="100%" stopColor="#0057FF" stopOpacity="0"/></linearGradient>
+            <radialGradient id="glow1" cx="75%" cy="0%" r="60%"><stop offset="0%" stopColor="#0057FF" stopOpacity="0.20"/><stop offset="100%" stopColor="#03080F" stopOpacity="0"/></radialGradient>
+            <radialGradient id="glow2" cx="20%" cy="100%" r="50%"><stop offset="0%" stopColor="#0057FF" stopOpacity="0.10"/><stop offset="100%" stopColor="#03080F" stopOpacity="0"/></radialGradient>
+          </defs>
+          {/* Ambient glows */}
+          <rect width="1440" height="900" fill="url(#glow1)"/>
+          <rect width="1440" height="900" fill="url(#glow2)"/>
+          {/* Diagonal rays from top-right */}
+          <polygon points="1440,0 1440,300 600,900 400,900" fill="url(#ray1)" opacity="0.9"/>
+          <polygon points="1440,0 1440,150 800,900 680,900" fill="url(#ray2)" opacity="0.8"/>
+          <polygon points="1440,80 1440,220 1000,900 880,900" fill="url(#ray3)" opacity="0.7"/>
+          {/* Left fade-in rays */}
+          <polygon points="0,600 200,900 0,900" fill="url(#ray3)" opacity="0.5"/>
+          {/* Subtle grid lines */}
+          <line x1="0" y1="0" x2="1440" y2="900" stroke="rgba(0,87,255,0.04)" strokeWidth="1"/>
+          <line x1="200" y1="0" x2="1440" y2="720" stroke="rgba(0,87,255,0.03)" strokeWidth="1"/>
+          <line x1="400" y1="0" x2="1440" y2="600" stroke="rgba(0,87,255,0.03)" strokeWidth="1"/>
+        </svg>
+      </div>
+      <div style={{ position:"relative", zIndex:1 }}>
       {editingProfile && <ProfileEditor profile={profile} onSave={p=>{setProfile(p);setEditingProfile(false);}} onClose={()=>setEditingProfile(false)} />}
       <NavBar page={page} onNav={onNav} drawActive={drawActive} />
       {page==="home"    && <Landing onNav={onNav} />}
@@ -2325,6 +2361,7 @@ export default function App() {
       {(page==="draw"||page==="draw-monthly"||page==="draw-weekly") && <LiveDraw boardType={boardType} onNav={onNav} profile={profile} onEditProfile={()=>setEditingProfile(true)} onDrawStateChange={setDrawActive} />}
       {page==="members" && <WinnersPage onNav={onNav} />}
       {page==="bonus"   && <BonusDraw onNav={onNav} profile={profile} onDrawStateChange={setDrawActive} />}
+      </div>
     </div>
   );
 }

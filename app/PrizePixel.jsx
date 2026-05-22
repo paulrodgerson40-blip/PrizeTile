@@ -1,33 +1,35 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 
-// ─── PRIZETILE ELITE PALETTE ─────────────────────────────────────────────────
-const BLUE        = "#0057FF";          // electric royal blue — broadcast energy
-const BLUE_BRIGHT = "#00C3FF";          // cyan — tile hits, accents
-const BLUE_DIM    = "rgba(0,87,255,0.14)";
-const BLUE_BORDER = "rgba(0,195,255,0.28)";
-const NAVY        = "#03080F";          // near-black — deepest background
-const NAVY2       = "#060C17";
-const NAVY3       = "#0A1221";          // card background
-const NAVY4       = "#0E1A2E";          // inner card
-const BORDER      = "rgba(0,195,255,0.12)";
-const BORDER2     = "rgba(0,195,255,0.22)";
-const SILVER      = "#C0D4F0";
+// ─── PRIZETILE RENDER-STYLE LUX PALETTE ─────────────────────────────────────
+const BLUE        = "#126BFF";          // electric royal blue
+const BLUE_BRIGHT = "#27D8FF";          // cyan glow
+const BLUE_SOFT   = "#62A8FF";
+const BLUE_DIM    = "rgba(18,107,255,0.14)";
+const BLUE_BORDER = "rgba(39,216,255,0.30)";
+const NAVY        = "#02060D";          // deep black navy
+const NAVY2       = "#050B16";
+const NAVY3       = "rgba(8,17,34,0.78)";          // glass card
+const NAVY4       = "rgba(12,25,47,0.78)";         // inner glass
+const BORDER      = "rgba(72,167,255,0.16)";
+const BORDER2     = "rgba(39,216,255,0.28)";
+const SILVER      = "#DCEBFF";
 const TEXT        = "#FFFFFF";
-const TEXT2       = "rgba(200,225,255,0.70)";
-const TEXT3       = "rgba(160,195,240,0.42)";
-const GOLD        = "#FFD700";          // true gold — premium, cash prizes
-const CHAMPAGNE   = "#FFE97A";          // light gold highlight
-const STEEL       = "#8BA5CC";
-const BRONZE      = "#CD9B4A";          // warm bronze for Bronze tier
-const GREEN       = "#00E676";
-const GREEN_DIM   = "rgba(0,230,118,0.10)";
-const GREEN_BORDER= "rgba(0,230,118,0.28)";
-const RAY_COLOR   = "rgba(0,87,255,0.07)";  // diagonal beam colour
+const TEXT2       = "rgba(220,235,255,0.76)";
+const TEXT3       = "rgba(170,205,245,0.46)";
+const GOLD        = "#6BE8FF";          // renamed by legacy code, visually electric ice-blue
+const CHAMPAGNE   = "#90F3FF";          // light cyan highlight
+const STEEL       = "#9DB7DA";
+const BRONZE      = "#7FA9E8";          // no muddy bronze/orange
+const GREEN       = "#00F5A0";
+const GREEN_DIM   = "rgba(0,245,160,0.10)";
+const GREEN_BORDER= "rgba(0,245,160,0.28)";
+const VIOLET      = "#735CFF";
+const RAY_COLOR   = "rgba(18,107,255,0.08)";
 
 const TIERS = {
-  bronze: { name: "Bronze", price: 29.99,  weeklyTiles: 10,  monthlyTiles: 10,  bonusTiles: 0,  bonusAccess: false, poolPct: 30, color: BRONZE, accent: "#B9D0FF", glow: "rgba(111,168,255,0.18)" },
-  silver: { name: "Silver", price: 59.99,  weeklyTiles: 40,  monthlyTiles: 40,  bonusTiles: 0,  bonusAccess: false, poolPct: 40, color: SILVER, accent: "#FFFFFF", glow: "rgba(200,216,232,0.2)" },
-  gold:   { name: "Gold",   price: 109.99, weeklyTiles: 100, monthlyTiles: 100, bonusTiles: 40, bonusAccess: true,  poolPct: 50, color: GOLD,   accent: CHAMPAGNE, glow: "rgba(0,245,160,0.24)" },
+  bronze: { name: "Bronze", price: 29.99,  weeklyTiles: 10,  monthlyTiles: 10,  bonusTiles: 0,  bonusAccess: false, poolPct: 30, color: "#78A7E8", accent: "#DCEBFF", glow: "rgba(39,216,255,0.16)" },
+  silver: { name: "Silver", price: 59.99,  weeklyTiles: 40,  monthlyTiles: 40,  bonusTiles: 0,  bonusAccess: false, poolPct: 40, color: "#DCEBFF", accent: "#FFFFFF", glow: "rgba(220,235,255,0.16)" },
+  gold:   { name: "Gold",   price: 109.99, weeklyTiles: 100, monthlyTiles: 100, bonusTiles: 40, bonusAccess: true,  poolPct: 50, color: "#27D8FF", accent: "#90F3FF", glow: "rgba(39,216,255,0.28)" },
 };
 
 // Bonus board tile allocation by tier
@@ -40,7 +42,7 @@ const BONUS_POOL_SOURCES = {
 
 const MEMBER_POOL = { bronze: 90000, silver: 50000, gold: 60000 }; // 90K Bronze · 50K Silver · 60K Gold
 // DEMO: tiles capped at 500K for browser performance — real system uses full 8.9M
-const ACTUAL_TILES = MEMBER_POOL.entry * 10 + MEMBER_POOL.premium * 40 + MEMBER_POOL.elite * 100; // 8.9M real
+const ACTUAL_TILES = MEMBER_POOL.bronze * 10 + MEMBER_POOL.silver * 40 + MEMBER_POOL.gold * 100; // 8.9M real
 const TOTAL_TILES  = 10000;  // demo cap — smooth browser draw
 
 // DEMO prizes — board runs ~3 min, dramatic pauses for big prizes, silent for vouchers
@@ -133,17 +135,25 @@ function LmctLogo({ height = 38 }) {
 function BlueBtn({ children, onClick, outline, small, full }) {
   return (
     <button onClick={onClick} style={{
-      background: outline ? "transparent" : `linear-gradient(135deg, ${BLUE_BRIGHT}, ${BLUE})`,
-      color: TEXT, border: outline ? `2px solid ${BLUE}` : "none",
-      borderRadius: 8, padding: small ? "10px 22px" : "14px 36px",
-      fontSize: small ? 14 : 16, fontWeight: 900, cursor: "pointer",
+      background: outline ? "rgba(5,12,26,0.40)" : `linear-gradient(135deg, ${BLUE_BRIGHT} 0%, ${BLUE} 58%, #0B4DFF 100%)`,
+      color: TEXT,
+      border: outline ? `1.5px solid rgba(98,168,255,0.58)` : `1px solid rgba(39,216,255,0.75)`,
+      borderRadius: 10,
+      padding: small ? "10px 22px" : "15px 42px",
+      fontSize: small ? 13 : 16,
+      fontWeight: 900,
+      cursor: "pointer",
       width: full ? "100%" : undefined,
       fontFamily: "'Arial Black',Arial,sans-serif",
-      fontStyle: "italic", letterSpacing: 0.5,
-      boxShadow: outline ? "none" : `0 4px 20px rgba(43,159,232,0.4)`,
+      fontStyle: "italic",
+      letterSpacing: 0.7,
+      textTransform: "uppercase",
+      boxShadow: outline ? "inset 0 0 22px rgba(18,107,255,0.18), 0 0 22px rgba(18,107,255,0.14)" : "0 0 28px rgba(39,216,255,0.38), 0 12px 35px rgba(18,107,255,0.35)",
+      textShadow: "0 1px 0 rgba(0,0,0,0.45)",
+      transition: "transform .18s ease, filter .18s ease, box-shadow .18s ease",
     }}
-      onMouseOver={e => e.currentTarget.style.opacity = "0.88"}
-      onMouseOut={e => e.currentTarget.style.opacity = "1"}
+      onMouseOver={e => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.filter = "brightness(1.12)"; }}
+      onMouseOut={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.filter = "brightness(1)"; }}
     >{children}</button>
   );
 }
@@ -171,9 +181,9 @@ function StatCard({ label, val, accent }) {
 
 function SectionHead({ children }) {
   return (
-    <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 8 }}>
-      <div style={{ width: 4, height: 28, background: "linear-gradient(180deg,#00C3FF,#0066FF)", borderRadius: 2 }} />
-      <h2 style={{ fontSize: 32, fontWeight: 900, color: TEXT, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic", margin: 0, textTransform: "uppercase" }}>{children}</h2>
+    <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 10 }}>
+      <div style={{ width: 4, height: 34, background: "linear-gradient(180deg,#27D8FF,#126BFF)", borderRadius: 4, boxShadow:"0 0 18px rgba(39,216,255,.55)" }} />
+      <h2 style={{ fontSize: 34, fontWeight: 900, color: TEXT, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic", margin: 0, textTransform: "uppercase", letterSpacing:-0.5, textShadow:"0 0 24px rgba(98,168,255,.18)" }}>{children}</h2>
     </div>
   );
 }
@@ -187,31 +197,30 @@ function NavBar({ page, onNav, drawActive }) {
     { id: "members", label: "Winners" },
   ];
   return (
-    <div style={{ background:"rgba(3,8,15,0.92)", backdropFilter:"blur(20px)", borderBottom:`1px solid rgba(0,87,255,0.25)`, boxShadow:"0 1px 0 rgba(0,195,255,0.08)", display:"flex", alignItems:"center", padding:"0 32px", height:66, position:"sticky", top:0, zIndex:200 }}>
-      <button onClick={() => onNav("home")} style={{ background:"transparent", border:"none", cursor:"pointer", marginRight:36, padding:0, lineHeight:0 }}>
+    <div style={{ background:"rgba(2,6,13,0.86)", backdropFilter:"blur(22px)", borderBottom:`1px solid rgba(98,168,255,0.22)`, boxShadow:"0 1px 0 rgba(39,216,255,0.10), 0 14px 40px rgba(0,0,0,0.28)", display:"flex", alignItems:"center", padding:"0 30px", height:70, position:"sticky", top:0, zIndex:200 }}>
+      <button onClick={() => onNav("home")} style={{ background:"transparent", border:"none", cursor:"pointer", marginRight:46, padding:0, lineHeight:0 }}>
         <LmctLogo height={40} />
       </button>
-      <div style={{ display:"flex", gap:2, flex:1 }}>
+      <div style={{ display:"flex", gap:16, flex:1, alignItems:"stretch", height:"100%" }}>
         {links.map(l => {
           const active = page.startsWith(l.id);
           return (
             <button key={l.id} onClick={() => onNav(l.id)} style={{
-              background:"transparent", border:"none", padding:"8px 18px",
-              color: active ? "#FFFFFF" : TEXT2,
-              fontSize:14, fontWeight: active ? 700 : 400,
-              cursor:"pointer", letterSpacing: active ? 0.5 : 0,
-              position:"relative",
-              transition:"color 0.2s",
+              background:"transparent", border:"none", padding:"0 8px",
+              color: active ? BLUE_BRIGHT : "rgba(232,242,255,0.76)",
+              fontSize:14, fontWeight: active ? 900 : 700,
+              cursor:"pointer", letterSpacing: active ? 0.3 : 0,
+              position:"relative", transition:"color 0.2s", fontStyle: active ? "italic" : "normal",
             }}>
               {l.label}
-              {active && <span style={{ position:"absolute", bottom:0, left:"50%", transform:"translateX(-50%)", width:"60%", height:2, background:`linear-gradient(90deg,${BLUE},${BLUE_BRIGHT})`, borderRadius:2, display:"block" }} />}
+              {active && <span style={{ position:"absolute", bottom:0, left:"50%", transform:"translateX(-50%)", width:"100%", height:3, background:`linear-gradient(90deg, transparent, ${BLUE_BRIGHT}, ${BLUE}, transparent)`, borderRadius:2, display:"block", boxShadow:"0 0 16px rgba(39,216,255,.7)" }} />}
             </button>
           );
         })}
       </div>
-      <button onClick={() => onNav("draw")} style={{ display:"flex", alignItems:"center", gap:8, background:`linear-gradient(135deg,${BLUE},#0040CC)`, border:"none", borderRadius:8, padding:"9px 18px", cursor:"pointer", boxShadow:`0 0 20px rgba(0,87,255,0.4)` }}>
-        <span style={{ width:7, height:7, borderRadius:"50%", background:drawActive?"#00FF88":"#FF3344", display:"inline-block", animation:"blink 1.5s ease-in-out infinite", boxShadow:drawActive?"0 0 8px #00FF88":"0 0 8px #FF3344" }} />
-        <span style={{ fontSize:12, color:"#FFFFFF", fontWeight:900, textTransform:"uppercase", letterSpacing:1.5, fontFamily:"'Arial Black',Arial,sans-serif" }}>PRIZETILE DEMO</span>
+      <button onClick={() => onNav("draw")} style={{ display:"flex", alignItems:"center", gap:9, background:"rgba(5,15,32,0.70)", border:"1px solid rgba(39,216,255,0.48)", borderRadius:12, padding:"10px 18px", cursor:"pointer", boxShadow:`inset 0 0 18px rgba(18,107,255,.18), 0 0 22px rgba(18,107,255,.20)` }}>
+        <span style={{ width:8, height:8, borderRadius:"50%", background:drawActive?GREEN:"#FF2E4D", display:"inline-block", animation:"blink 1.5s ease-in-out infinite", boxShadow:drawActive?"0 0 10px #00F5A0":"0 0 10px #FF2E4D" }} />
+        <span style={{ fontSize:12, color:BLUE_BRIGHT, fontWeight:900, textTransform:"uppercase", letterSpacing:1.8, fontFamily:"'Arial Black',Arial,sans-serif" }}>PRIZETILE DEMO</span>
       </button>
     </div>
   );
@@ -305,51 +314,45 @@ function DrawCycleCountdown() {
   const pad = n => String(n??0).padStart(2,"0");
   const drawDate = satMillionaire.toLocaleDateString("en-AU",{weekday:"long",day:"numeric",month:"long"});
   return (
-    <div style={{ marginBottom:48, position:"relative" }}>
-      <div style={{ background:"rgba(4,8,20,0.88)", border:`1px solid rgba(0,87,255,0.30)`, borderRadius:24, padding:"48px 40px", textAlign:"center", position:"relative", overflow:"hidden", backdropFilter:"blur(20px)", boxShadow:"0 0 120px rgba(0,87,255,0.20), 0 20px 80px rgba(0,0,0,0.6)" }}>
-        {/* Background glow */}
-        <div style={{ position:"absolute", top:"50%", left:"50%", transform:"translate(-50%,-50%)", width:700, height:400, background:`radial-gradient(ellipse, rgba(0,87,255,0.12) 0%, transparent 70%)`, pointerEvents:"none" }} />
-        {/* Next draw label */}
-        <div style={{ fontSize:11, color:BLUE_BRIGHT, textTransform:"uppercase", letterSpacing:5, fontWeight:700, marginBottom:20, position:"relative", display:"flex", alignItems:"center", justifyContent:"center", gap:10 }}>
-          <span style={{ color:GOLD }}>✦</span><span>NEXT DRAW</span><span style={{ color:GOLD }}>✦</span>
+    <div style={{ margin:"0 auto 56px", maxWidth:860, position:"relative" }}>
+      <div style={{ background:"linear-gradient(180deg, rgba(10,28,58,0.72), rgba(3,10,24,0.88))", border:`1.5px solid rgba(39,216,255,0.55)`, borderRadius:22, padding:"36px 34px 28px", textAlign:"center", position:"relative", overflow:"hidden", backdropFilter:"blur(22px)", boxShadow:"0 0 55px rgba(18,107,255,0.22), inset 0 0 60px rgba(39,216,255,0.05), 0 26px 90px rgba(0,0,0,0.62)" }}>
+        <div style={{ position:"absolute", inset:0, background:"radial-gradient(circle at 50% 8%, rgba(39,216,255,.16), transparent 35%), linear-gradient(135deg, rgba(18,107,255,.10), transparent 45%, rgba(39,216,255,.08))", pointerEvents:"none" }} />
+        <div style={{ fontSize:11, color:BLUE_BRIGHT, textTransform:"uppercase", letterSpacing:5, fontWeight:900, marginBottom:18, position:"relative", display:"flex", alignItems:"center", justifyContent:"center", gap:10 }}>
+          <span style={{ color:BLUE_BRIGHT }}>✦</span><span>NEXT DRAW</span><span style={{ color:BLUE_BRIGHT }}>✦</span>
         </div>
-        {/* Big prize total — WHITE for maximum impact */}
-        <div style={{ fontSize:"clamp(52px,8vw,96px)", fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", textTransform:"uppercase", color:"#FFFFFF", lineHeight:1, marginBottom:6, position:"relative", textShadow:"0 0 40px rgba(255,255,255,0.25), 0 0 80px rgba(0,87,255,0.4)" }}>
+        <div style={{ fontSize:"clamp(52px,7vw,94px)", fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", textTransform:"uppercase", color:"#F7FBFF", lineHeight:1, marginBottom:6, position:"relative", textShadow:"0 0 22px rgba(255,255,255,0.35), 0 0 60px rgba(39,216,255,0.42)" }}>
           $6,000,000
         </div>
-        <div style={{ fontSize:16, color:GOLD, fontWeight:700, marginBottom:40, letterSpacing:1, position:"relative", fontStyle:"italic" }}>
+        <div style={{ fontSize:18, color:BLUE_BRIGHT, fontWeight:900, marginBottom:34, letterSpacing:1.2, position:"relative", fontStyle:"italic" }}>
           in prizes — every month
         </div>
-        {/* Countdown */}
-        <div style={{ display:"flex", gap:10, justifyContent:"center", alignItems:"center", marginBottom:40, position:"relative" }}>
+        <div style={{ display:"flex", gap:12, justifyContent:"center", alignItems:"center", marginBottom:28, position:"relative", flexWrap:"wrap" }}>
           {[{v:cd.d,l:"Days"},{v:cd.h,l:"Hours"},{v:cd.m,l:"Mins"},{v:cd.s,l:"Secs"}].map(({v,l},i)=>(
-            <div key={l} style={{ display:"flex", alignItems:"center", gap:10 }}>
+            <div key={l} style={{ display:"flex", alignItems:"center", gap:12 }}>
               <div style={{ textAlign:"center" }}>
-                <div style={{ background:"rgba(10,20,45,0.80)", border:`1px solid ${GOLD}44`, borderRadius:12, padding:"18px 22px", minWidth:82, boxShadow:`0 0 24px ${GOLD}18`, backdropFilter:"blur(8px)" }}>
-                  <div style={{ fontSize:"clamp(38px,6vw,64px)", fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif", color:GOLD, lineHeight:1 }}>{pad(v)}</div>
+                <div style={{ background:"rgba(3,12,28,0.74)", border:`1px solid rgba(98,168,255,0.42)`, borderRadius:12, padding:"14px 20px", minWidth:96, boxShadow:`inset 0 0 22px rgba(39,216,255,0.08), 0 0 22px rgba(18,107,255,0.18)`, backdropFilter:"blur(10px)" }}>
+                  <div style={{ fontSize:"clamp(38px,5vw,58px)", fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif", color:BLUE_BRIGHT, lineHeight:1, textShadow:"0 0 18px rgba(39,216,255,.55)" }}>{pad(v)}</div>
                 </div>
-                <div style={{ fontSize:10, color:TEXT2, marginTop:8, textTransform:"uppercase", letterSpacing:2.5, fontWeight:700 }}>{l}</div>
+                <div style={{ fontSize:10, color:"rgba(220,235,255,0.68)", marginTop:8, textTransform:"uppercase", letterSpacing:2.5, fontWeight:700 }}>{l}</div>
               </div>
-              {i<3 && <div style={{ fontSize:44, color:`${GOLD}66`, fontWeight:900, marginBottom:28, lineHeight:1 }}>:</div>}
+              {i<3 && <div style={{ fontSize:38, color:`rgba(220,235,255,0.55)`, fontWeight:900, marginBottom:25, lineHeight:1 }}>:</div>}
             </div>
           ))}
         </div>
-        {/* Date */}
-        <div style={{ fontSize:13, color:TEXT2, marginBottom:28, position:"relative", letterSpacing:0.5 }}>
-          📅 {drawDate} · 8:00 PM AEST · Drawn Live by Independent Draw Manager
+        <div style={{ fontSize:13, color:TEXT2, marginBottom:22, position:"relative", letterSpacing:0.3 }}>
+          🗓️ {drawDate} · 8:00 PM AEST · Drawn Live by Independent Draw Manager
         </div>
-        {/* Prize pills */}
         <div style={{ display:"flex", gap:8, justifyContent:"center", flexWrap:"wrap", position:"relative" }}>
           {[
-            { emoji:"💰", label:"$1,000,000 Cash",   color:GOLD },
+            { emoji:"💵", label:"$1,000,000 Cash",   color:GREEN },
             { emoji:"🏎️", label:"50 Brand New Cars",  color:BLUE_BRIGHT },
             { emoji:"✈️", label:"100 Holidays",        color:BLUE_BRIGHT },
             { emoji:"💻", label:"500 Tech Bundles",    color:STEEL },
-            { emoji:"🛒", label:"10,000 Vouchers",     color:BLUE_BRIGHT },
+            { emoji:"🎟️", label:"10,000 Vouchers",     color:BLUE_SOFT },
           ].map(p=>(
-            <div key={p.label} style={{ display:"flex", alignItems:"center", gap:6, background:`${p.color}16`, border:`1px solid ${p.color}40`, borderRadius:20, padding:"8px 16px", backdropFilter:"blur(8px)" }}>
-              <span style={{ fontSize:15 }}>{p.emoji}</span>
-              <span style={{ fontSize:13, color:p.color, fontWeight:700 }}>{p.label}</span>
+            <div key={p.label} style={{ display:"flex", alignItems:"center", gap:7, background:`${p.color}12`, border:`1px solid ${p.color}55`, borderRadius:999, padding:"8px 15px", backdropFilter:"blur(8px)", boxShadow:"inset 0 0 16px rgba(39,216,255,.06)" }}>
+              <span style={{ fontSize:14 }}>{p.emoji}</span>
+              <span style={{ fontSize:12, color:p.color, fontWeight:900 }}>{p.label}</span>
             </div>
           ))}
         </div>
@@ -371,209 +374,136 @@ function CryptoBadge({ small }) {
 
 function Landing({ onNav }) {
   return (
-    <div style={{ minHeight:"100vh" }}>
-      <div style={{ maxWidth:1060, margin:"0 auto", padding:"72px 32px 80px" }}>
+    <div style={{ minHeight:"100vh", position:"relative" }}>
+      <div style={{ maxWidth:1160, margin:"0 auto", padding:"52px 32px 86px", position:"relative" }}>
+        <div style={{ position:"absolute", top:62, left:120, right:120, height:140, pointerEvents:"none", opacity:.78 }}>
+          <svg width="100%" height="100%" viewBox="0 0 920 140" preserveAspectRatio="none">
+            <path d="M0 58 L150 58 L192 20 L300 20" fill="none" stroke="rgba(39,216,255,.22)" strokeWidth="1.2" />
+            <path d="M920 58 L770 58 L728 20 L620 20" fill="none" stroke="rgba(39,216,255,.22)" strokeWidth="1.2" />
+            <circle cx="160" cy="58" r="2" fill="#27D8FF"><animate attributeName="opacity" values="0;1;0" dur="2.4s" repeatCount="indefinite"/></circle>
+            <circle cx="760" cy="58" r="2" fill="#27D8FF"><animate attributeName="opacity" values="0;1;0" dur="2.8s" repeatCount="indefinite"/></circle>
+          </svg>
+        </div>
 
-        {/* Hero */}
-        <div style={{ textAlign: "center", marginBottom: 80 }}>
-          <div style={{ display:"flex", gap:10, justifyContent:"center", flexWrap:"wrap", marginBottom:28 }}>
-            <div style={{ display:"inline-flex", alignItems:"center", gap:10, background:BLUE_DIM, border:`1px solid ${BLUE_BORDER}`, borderRadius:40, padding:"8px 22px" }}>
-              <span style={{ width:7, height:7, borderRadius:"50%", background:BLUE_BRIGHT, display:"inline-block" }} />
-              <span style={{ color:BLUE_BRIGHT, fontSize:12, fontWeight:700, letterSpacing:2.5, textTransform:"uppercase", fontFamily:"'Arial Black',Arial,sans-serif" }}>Member Reward Engine</span>
-            </div>
-            <CryptoBadge />
-            <div style={{ display:"inline-flex", alignItems:"center", gap:8, background:"rgba(73,217,255,0.08)", border:"1px solid rgba(73,217,255,0.18)", borderRadius:40, padding:"8px 18px" }}>
-              <span style={{ fontSize:12 }}>ID</span>
-              <span style={{ color:BLUE_BRIGHT, fontSize:11, fontWeight:700, letterSpacing:1.5, textTransform:"uppercase" }}>Verified Members</span>
-            </div>
-          </div>
+        <div style={{ textAlign: "center", marginBottom: 50, position:"relative" }}>
           <div style={{ marginBottom: 20 }}>
-            <div style={{ fontSize: "clamp(34px, 5.5vw, 66px)", fontWeight: 900, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic", textTransform: "uppercase", lineHeight: 1, color: TEXT, letterSpacing: -2, marginBottom: 6 }}>
+            <div style={{ fontSize: "clamp(40px, 6.6vw, 72px)", fontWeight: 900, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic", textTransform: "uppercase", lineHeight: .92, color: TEXT, letterSpacing: -2.5, marginBottom: 8, textShadow:"0 0 22px rgba(255,255,255,.18), 0 8px 0 rgba(0,0,0,.28)" }}>
               AUSTRALIA'S FIRST
             </div>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 14, background: BLUE_BRIGHT, borderRadius: 6, padding: "8px 28px", marginBottom: 10, boxShadow:`0 0 40px ${BLUE_BRIGHT}66` }}>
-              <span style={{ fontSize: 16, color: NAVY, fontWeight: 900, fontFamily: "'Arial Black',Arial,sans-serif" }}>✦</span>
-              <span style={{ fontSize: "clamp(30px, 5vw, 56px)", fontWeight: 900, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic", textTransform: "uppercase", color: NAVY, letterSpacing: -1, lineHeight: 1.1 }}>LIVE PRIZE BOARD</span>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 14, background: "linear-gradient(135deg,#27D8FF,#126BFF)", borderRadius: 8, padding: "10px 32px", marginBottom: 12, boxShadow:`0 0 36px rgba(39,216,255,.42), inset 0 1px 0 rgba(255,255,255,.28)`, transform:"skewX(-7deg)" }}>
+              <span style={{ fontSize: 17, color: NAVY, fontWeight: 900, fontFamily: "'Arial Black',Arial,sans-serif", transform:"skewX(7deg)" }}>✦</span>
+              <span style={{ fontSize: "clamp(31px, 5.3vw, 58px)", fontWeight: 900, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic", textTransform: "uppercase", color: "#06111F", letterSpacing: -1.2, lineHeight: 1.05, transform:"skewX(7deg)" }}>LIVE PRIZE BOARD</span>
             </div>
-            <div style={{ fontSize: "clamp(30px, 5vw, 60px)", fontWeight: 900, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic", textTransform: "uppercase", lineHeight: 1, color: TEXT, letterSpacing: -2 }}>
+            <div style={{ fontSize: "clamp(32px, 5.7vw, 64px)", fontWeight: 900, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic", textTransform: "uppercase", lineHeight: .96, color: TEXT, letterSpacing: -2.2, textShadow:"0 0 22px rgba(255,255,255,.14), 0 8px 0 rgba(0,0,0,.28)" }}>
               & MEMBER DRAW ENGINE
             </div>
           </div>
-          <p style={{ fontSize: 18, color: TEXT2, maxWidth: 540, margin: "28px auto 48px", lineHeight: 1.6 }}>
-            Before every draw, all member tiles are <strong style={{ color: TEXT }}>randomly placed on the board</strong>. The board reveals live. Every month on a Saturday we give away <strong style={{ color: GOLD }}>$5,000,000 in prizes</strong> — including <strong style={{ color: BLUE_BRIGHT }}>$1,000,000 cash</strong>, 50 brand new cars and 100 holidays. Gold members compete in an exclusive <strong style={{ color: GOLD }}>$1,000,000 bonus draw</strong> the same night. 
+          <p style={{ fontSize: 16, color: TEXT2, maxWidth: 590, margin: "24px auto 30px", lineHeight: 1.62 }}>
+            Before every draw, all member tiles are <strong style={{ color: TEXT }}>randomly placed on the board</strong>. The board reveals live. Every month on a Saturday we give away <strong style={{ color: BLUE_BRIGHT }}>$5,000,000 in prizes</strong> — including <strong style={{ color: BLUE_BRIGHT }}>$1,000,000 cash</strong>, 50 brand new cars and 100 holidays. Gold members compete in an exclusive <strong style={{ color: BLUE_BRIGHT }}>$1,000,000 bonus draw</strong> the same night.
           </p>
-          <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap", marginBottom:42 }}>
             <BlueBtn onClick={() => onNav("draw")}>▶ WATCH LIVE DRAW</BlueBtn>
             <BlueBtn onClick={() => onNav("tiers")} outline>VIEW TIERS</BlueBtn>
           </div>
         </div>
 
-        {/* Draw cycle countdown */}
         <DrawCycleCountdown />
 
-        {/* 3 headline numbers */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 80 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 74 }}>
           {[
-            { val: "$5,000,000",  label: "In prizes one Saturday night every month", sub: "Top prize: $1,000,000 cash",              accent: GOLD },
-            { val: "50 Cars",     label: "Given away in a single night — every month", sub: "Plus 100 holidays · 10,000 vouchers",   accent: "#00C3FF" },
-            { val: "$1,000,000",  label: "Gold exclusive bonus draw — same night",   sub: "Gold members only · 10,000 vouchers · More visible odds than a traditional prize draw", accent: GOLD },
+            { val: "$5,000,000",  label: "In prizes one Saturday night every month", sub: "Top prize: $1,000,000 cash",              accent: BLUE_BRIGHT },
+            { val: "50 Cars",     label: "Given away in a single night — every month", sub: "Plus 100 holidays · 10,000 vouchers",   accent: "#FFFFFF" },
+            { val: "$1,000,000",  label: "Gold exclusive bonus draw — same night",   sub: "Gold members only · 10,000 vouchers", accent: GREEN },
           ].map(s => (
-            <div key={s.label} style={{ background: NAVY3, border: `1px solid ${BORDER}`, borderRadius: 16, padding: "28px 24px", textAlign: "center" }}>
-              <div style={{ fontSize: "clamp(28px,4vw,44px)", fontWeight: 900, color: s.accent, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic", lineHeight: 1, marginBottom: 8 }}>{s.val}</div>
+            <div key={s.label} style={{ background: "rgba(8,17,34,0.64)", border: `1px solid rgba(98,168,255,0.20)`, borderRadius: 18, padding: "26px 24px", textAlign: "center", backdropFilter:"blur(18px)", boxShadow:"inset 0 0 35px rgba(39,216,255,.04), 0 18px 55px rgba(0,0,0,.32)" }}>
+              <div style={{ fontSize: "clamp(28px,4vw,44px)", fontWeight: 900, color: s.accent, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic", lineHeight: 1, marginBottom: 8, textShadow:`0 0 18px ${s.accent}44` }}>{s.val}</div>
               <div style={{ fontSize: 13, color: TEXT2, lineHeight: 1.5, marginBottom: 6 }}>{s.label}</div>
-              <div style={{ fontSize: 10, color: s.accent, textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 700, opacity: 0.7 }}>{s.sub}</div>
+              <div style={{ fontSize: 10, color: s.accent, textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 700, opacity: 0.75 }}>{s.sub}</div>
             </div>
           ))}
         </div>
 
-        {/* Tile allocation — the core mechanic */}
-        <div style={{ borderTop: `1px solid ${BORDER}`, paddingTop: 64, marginBottom: 64 }}>
+        <div style={{ borderTop: `1px solid ${BORDER}`, paddingTop: 56, marginBottom: 60 }}>
           <SectionHead>How Many Tiles Do You Get?</SectionHead>
-          <p style={{ color: TEXT2, marginBottom: 40, marginLeft: 14, fontSize: 16, maxWidth: 600 }}>
-            Your membership tier decides how many tiles you get each draw. Before every draw, all tiles from all members are <strong style={{ color: TEXT }}>randomly placed on the board</strong>. More tiles = more positions on the board = more chances to win.
+          <p style={{ color: TEXT2, marginBottom: 34, marginLeft: 14, fontSize: 16, maxWidth: 650 }}>
+            Your membership tier decides how many tiles you get each draw. Before every draw, all tiles from all members are <strong style={{ color: TEXT }}>randomly placed on the board</strong>. More tiles means more positions and more chances to hit.
           </p>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 28 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 24 }}>
             {[
-              { tier: "Bronze", price: "$29.99/mo", tiles: 10,  pct:30, color: BRONZE, glow: "rgba(111,168,255,0.18)",   tagline: "Get started", bonusAccess: false },
-              { tier: "Silver", price: "$59.99/mo", tiles: 40,  pct:25, color: SILVER, glow: "rgba(200,216,232,0.12)", tagline: "4× more chances every draw", bonusAccess: false },
-              { tier: "Gold",   price: "$109.99/mo",tiles: 100, pct:50, color: GOLD, glow: "rgba(0,245,160,0.16)",    tagline: "10× tiles + exclusive $1M Bonus Draw", bonusAccess: true },
+              { tier: "Bronze", price: "$29.99/mo", tiles: 10, color: "#78A7E8", tagline: "Get started" },
+              { tier: "Silver", price: "$59.99/mo", tiles: 40, color: "#DCEBFF", tagline: "4× more chances every draw" },
+              { tier: "Gold",   price: "$109.99/mo",tiles: 100, color: BLUE_BRIGHT, tagline: "10× tiles + exclusive $1M Bonus Draw" },
             ].map(t => (
-              <div key={t.tier} style={{ background: NAVY3, border: `2px solid ${t.color}44`, borderRadius: 18, padding: "32px 24px", textAlign: "center", boxShadow: `0 0 30px ${t.glow}` }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 20 }}>
-                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: t.color }} />
+              <div key={t.tier} style={{ background: "rgba(8,17,34,0.70)", border: `1.5px solid ${t.color}44`, borderRadius: 18, padding: "30px 24px", textAlign: "center", boxShadow: `0 0 34px ${t.color}18`, backdropFilter:"blur(18px)" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 16 }}>
+                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: t.color, boxShadow:`0 0 12px ${t.color}` }} />
                   <span style={{ fontSize: 12, fontWeight: 900, color: t.color, textTransform: "uppercase", letterSpacing: 2.5, fontFamily: "'Arial Black',Arial,sans-serif" }}>{t.tier}</span>
                 </div>
-                <div style={{ fontSize: "clamp(56px,8vw,80px)", fontWeight: 900, color: t.color, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic", lineHeight: 1, marginBottom: 4, textShadow: `0 0 30px ${t.glow}` }}>{t.tiles}</div>
-                <div style={{ fontSize: 15, color: TEXT, fontWeight: 700, marginBottom: 16 }}>tiles per draw</div>
-                <div style={{ height: 1, background: BORDER, marginBottom: 16 }} />
-                <div style={{ fontSize: 22, fontWeight: 900, color: TEXT, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic", marginBottom: 4 }}>{t.price}</div>
-                <div style={{ fontSize: 12, color: TEXT3, marginBottom: 14 }}>per month</div>
-                <div style={{ fontSize: 12, color: t.color, fontWeight: 600 }}>{t.tagline}</div>
+                <div style={{ fontSize: "clamp(50px,7vw,74px)", fontWeight: 900, color: t.color, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic", lineHeight: 1, marginBottom: 4, textShadow: `0 0 24px ${t.color}33` }}>{t.tiles}</div>
+                <div style={{ fontSize: 15, color: TEXT, fontWeight: 800, marginBottom: 14 }}>tiles per draw</div>
+                <div style={{ height: 1, background: BORDER, marginBottom: 14 }} />
+                <div style={{ fontSize: 20, fontWeight: 900, color: TEXT, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic", marginBottom: 4 }}>{t.price}</div>
+                <div style={{ fontSize: 12, color: TEXT3, marginBottom: 12 }}>per month</div>
+                <div style={{ fontSize: 12, color: t.color, fontWeight: 800 }}>{t.tagline}</div>
               </div>
             ))}
           </div>
-
-          <div style={{ background: NAVY3, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "20px 28px", display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
-            <div style={{ fontSize: 13, color: TEXT2, lineHeight: 1.7, flex: 1 }}>
-              Before every draw, all members' tiles — yours and everyone else's — are <strong style={{ color: TEXT }}>randomly placed across the board</strong>. Your position changes each draw. You can see your allocated tile numbers in your member profile once the board is locked.
-            </div>
-          </div>
         </div>
 
-        {/* The two draws — clearly separated */}
-        <div style={{ borderTop: `1px solid ${BORDER}`, paddingTop: 64, marginBottom: 64 }}>
+        <div style={{ borderTop: `1px solid ${BORDER}`, paddingTop: 56, marginBottom: 60 }}>
           <SectionHead>One Night. One Million. Every Month.</SectionHead>
-          <p style={{ color: TEXT2, marginBottom: 40, marginLeft: 14, fontSize: 16 }}>
-            Every month on a Saturday night, LMCT+ gives away <strong style={{ color: GOLD }}>$5,000,000 in prizes</strong> — 50 brand new cars, 100 holidays, 500 tech bundles, 10,000 partner vouchers and <strong style={{ color: GOLD }}>$1,000,000 cash</strong>. Gold members compete in an exclusive <strong style={{ color: CHAMPAGNE }}>$1,000,000 bonus draw</strong> the same night.
+          <p style={{ color: TEXT2, marginBottom: 34, marginLeft: 14, fontSize: 16 }}>
+            Every month on a Saturday night, LMCT+ gives away <strong style={{ color: BLUE_BRIGHT }}>$5,000,000 in prizes</strong>. Gold members also compete in an exclusive <strong style={{ color: GREEN }}>$1,000,000 bonus draw</strong> the same night.
           </p>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-
-            {/* Monthly */}
-            <div style={{ background: NAVY3, border: `2px solid ${BLUE_BORDER}`, borderRadius: 18, overflow: "hidden", boxShadow: `0 0 40px rgba(0,102,255,0.1)` }}>
-              <div style={{ background: BLUE_DIM, borderBottom: `1px solid ${BLUE_BORDER}`, padding: "18px 28px" }}>
-                <div style={{ fontSize: 11, color: GOLD, textTransform: "uppercase", letterSpacing: 2.5, fontWeight: 700, marginBottom: 4 }}>Every Month — Saturday Night</div>
+          <div style={{ display: "grid", gridTemplateColumns:"1.3fr .9fr", gap: 18 }}>
+            <div style={{ background: "rgba(8,17,34,0.68)", border: `1.5px solid ${BLUE_BORDER}`, borderRadius: 18, overflow: "hidden", boxShadow: `0 0 42px rgba(18,107,255,0.16)`, backdropFilter:"blur(18px)" }}>
+              <div style={{ background: "linear-gradient(90deg, rgba(18,107,255,0.22), rgba(39,216,255,0.10))", borderBottom: `1px solid ${BLUE_BORDER}`, padding: "18px 26px" }}>
+                <div style={{ fontSize: 11, color: BLUE_BRIGHT, textTransform: "uppercase", letterSpacing: 2.5, fontWeight: 900, marginBottom: 4 }}>Every Month — Saturday Night</div>
                 <div style={{ fontSize: 24, fontWeight: 900, color: TEXT, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic" }}>Monthly Millionaire Draw</div>
-                <div style={{ fontSize: 13, color: TEXT2, marginTop: 4 }}>$5,000,000 in prizes — $1,000,000 cash · 50 brand new cars · 100 holidays · 500 tech bundles · 10,000 partner vouchers</div>
               </div>
-              <div style={{ padding: "20px 28px" }}>
+              <div style={{ padding: "18px 26px" }}>
                 {[
-                  { emoji: "💰", prize: "$1,000,000 Cash",         desc: "1 member becomes a millionaire — every month",   color: GOLD },
-                  { emoji: "🏎️", prize: "Brand New Car",           desc: "50 winners — brand new car each",                color: BLUE },
-                  { emoji: "✈️", prize: "Holiday Package",          desc: "100 winners — flights, accommodation & more",    color: BLUE_BRIGHT },
-                  { emoji: "💻", prize: "Tech Bundle",              desc: "500 winners — latest tech gear",                 color: STEEL },
-                  { emoji: "🛒", prize: "LMCT+ Partner Voucher",    desc: "10,000 winners every month",                    color: BLUE_BRIGHT },
+                  { emoji: "💵", prize: "$1,000,000 Cash", desc: "1 member becomes a millionaire — every month", color: GREEN },
+                  { emoji: "🏎️", prize: "Brand New Car", desc: "50 winners — brand new car each", color: BLUE_BRIGHT },
+                  { emoji: "✈️", prize: "Holiday Package", desc: "100 winners", color: BLUE_BRIGHT },
+                  { emoji: "💻", prize: "Tech Bundle", desc: "500 winners", color: STEEL },
+                  { emoji: "🎟️", prize: "LMCT+ Partner Voucher", desc: "10,000 winners every month", color: BLUE_SOFT },
                 ].map(r => (
-                  <div key={r.prize} style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 0", borderBottom: `1px solid ${BORDER}` }}>
-                    <div style={{ fontSize: 20, flexShrink: 0 }}>{r.emoji}</div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 16, fontWeight: 900, color: r.color, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic" }}>{r.prize}</div>
-                      <div style={{ fontSize: 12, color: TEXT3, marginTop: 2 }}>{r.desc}</div>
-                    </div>
+                  <div key={r.prize} style={{ display: "flex", alignItems: "center", gap: 14, padding: "11px 0", borderBottom: `1px solid ${BORDER}` }}>
+                    <div style={{ fontSize: 20 }}>{r.emoji}</div><div style={{ flex:1 }}><div style={{ fontSize: 15, fontWeight: 900, color: r.color, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic" }}>{r.prize}</div><div style={{ fontSize: 12, color: TEXT3 }}>{r.desc}</div></div>
                   </div>
                 ))}
               </div>
             </div>
-
-            {/* Gold Bonus Draw — clean, no funding details */}
-            <div style={{ background: NAVY3, border: `2px solid rgba(0,245,160,0.28)`, borderRadius: 18, overflow: "hidden", boxShadow: "0 0 40px rgba(0,245,160,0.10)", gridColumn: "1 / -1" }}>
-              <div style={{ background: "rgba(0,245,160,0.10)", borderBottom: "1px solid rgba(0,245,160,0.22)", padding: "18px 28px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-                <div>
-                  <div style={{ fontSize: 11, color: CHAMPAGNE, textTransform: "uppercase", letterSpacing: 2.5, fontWeight: 700, marginBottom: 4 }}>Every Month — Gold Members Only</div>
-                  <div style={{ fontSize: 24, fontWeight: 900, color: TEXT, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic" }}>$1,000,000 Gold Bonus Draw</div>
-                  <div style={{ fontSize: 13, color: TEXT2, marginTop: 4 }}>10,000 LMCT+ Partner Vouchers — Gold members only. Included with your Gold subscription. No extra payment ever required.</div>
-                </div>
-                <div style={{ background:"rgba(0,245,160,0.12)", border:"1px solid rgba(0,245,160,0.25)", borderRadius:14, padding:"14px 28px", textAlign:"center", flexShrink:0 }}>
-                  <div style={{ fontSize:10, color:CHAMPAGNE, textTransform:"uppercase", letterSpacing:1, marginBottom:4 }}>Prize Pool</div>
-                  <div style={{ fontSize:32, fontWeight:900, color:CHAMPAGNE, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic" }}>$1,000,000</div>
-                  <div style={{ fontSize:10, color:TEXT3, marginTop:2 }}>In prizes every month · Gold only</div>
-                </div>
+            <div style={{ background: "rgba(8,17,34,0.68)", border: `1.5px solid ${GREEN_BORDER}`, borderRadius: 18, overflow: "hidden", boxShadow: "0 0 42px rgba(0,245,160,0.12)", backdropFilter:"blur(18px)" }}>
+              <div style={{ background: "linear-gradient(90deg, rgba(0,245,160,0.18), rgba(39,216,255,0.08))", borderBottom: `1px solid ${GREEN_BORDER}`, padding: "18px 24px" }}>
+                <div style={{ fontSize: 11, color: GREEN, textTransform: "uppercase", letterSpacing: 2.3, fontWeight: 900, marginBottom: 5 }}>Gold Members Only</div>
+                <div style={{ fontSize: 23, fontWeight: 900, color: TEXT, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic" }}>$1,000,000 Bonus Draw</div>
               </div>
-              <div style={{ padding: "20px 28px" }}>
-                {[
-                  { emoji: "🛒", prize: "LMCT+ Partner Voucher", desc: "10,000 winners — $100 each · Gold members only", color: CHAMPAGNE },
-                ].map(r => (
-                  <div key={r.prize} style={{ display: "flex", alignItems: "center", gap: 14, padding: "16px 0" }}>
-                    <div style={{ fontSize: 32, flexShrink: 0 }}>{r.emoji}</div>
-                    <div>
-                      <div style={{ fontSize: 20, fontWeight: 900, color: r.color, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic" }}>{r.prize}</div>
-                      <div style={{ fontSize: 13, color: TEXT3, marginTop: 4 }}>{r.desc}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div style={{ padding:"12px 28px", borderTop:`1px solid ${BORDER}`, display:"flex", alignItems:"center", gap:10, background:"rgba(0,245,160,0.05)" }}>
-                <span style={{ fontSize:14 }}>★</span>
-                <span style={{ fontSize:12, color:CHAMPAGNE, fontWeight:700 }}>Gold members only · 40 bonus tiles · Every Gold member has a meaningful chance of winning their membership back every month</span>
+              <div style={{ padding:"24px" }}>
+                <div style={{ fontSize:46, color:GREEN, fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", textShadow:"0 0 28px rgba(0,245,160,.32)" }}>$1M</div>
+                <div style={{ color:TEXT2, lineHeight:1.6, fontSize:14, marginTop:8 }}>10,000 partner voucher winners every month. Included with Gold. No extra ticket purchase.</div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* How it works — super simple */}
-        <div style={{ borderTop: `1px solid ${BORDER}`, paddingTop: 64, marginBottom: 64 }}>
+        <div style={{ borderTop: `1px solid ${BORDER}`, paddingTop: 56, marginBottom: 64 }}>
           <SectionHead>How It Works</SectionHead>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginTop: 36 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginTop: 34 }}>
             {[
-              { n: "1", title: "Subscribe",    desc: "Pick Bronze, Silver, or Gold. Stay subscribed each month." },
-              { n: "2", title: "Get Your Tiles", desc: "Before each draw your tiles are randomly placed on the board alongside every other member. More tiles = more positions = more chances." },
-              { n: "3", title: "Watch Live",   desc: "The board reveals live — fast, dramatic and unstoppable. It pauses on every prize hit with a winner announcement." },
-              { n: "4", title: "Win",          desc: "Prizes paid immediately to verified members. More tiles means more positions on the board and more chances in the draw." },
+              { n: "1", title: "Subscribe", desc: "Pick Bronze, Silver, or Gold. Stay subscribed each month." },
+              { n: "2", title: "Get Your Tiles", desc: "Before each draw your tiles are randomly placed on the board." },
+              { n: "3", title: "Watch Live", desc: "The board reveals live with prize flashes, pauses and winner moments." },
+              { n: "4", title: "Win", desc: "Prizes are paid to verified members and results remain replayable." },
             ].map(s => (
-              <div key={s.n} style={{ background: NAVY3, border: `1px solid ${BORDER}`, borderRadius: 16, padding: "28px 22px", position: "relative", overflow: "hidden" }}>
+              <div key={s.n} style={{ background: "rgba(8,17,34,0.70)", border: `1px solid ${BORDER}`, borderRadius: 16, padding: "28px 22px", position: "relative", overflow: "hidden", backdropFilter:"blur(16px)" }}>
                 <div style={{ position: "absolute", top: -8, right: 10, fontSize: 64, fontWeight: 900, color: BLUE_DIM, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic", lineHeight: 1, pointerEvents: "none" }}>{s.n}</div>
                 <div style={{ fontSize: 15, fontWeight: 900, color: TEXT, marginBottom: 10, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic", textTransform: "uppercase", position: "relative" }}>{s.title}</div>
                 <div style={{ fontSize: 14, color: TEXT2, lineHeight: 1.65, position: "relative" }}>{s.desc}</div>
               </div>
             ))}
           </div>
-        </div>
-
-        {/* CTAs */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 64 }}>
-          <button onClick={() => onNav("draw")} style={{ background: BLUE_DIM, border: `1px solid ${BLUE_BORDER}`, borderRadius: 18, padding: "32px 28px", cursor: "pointer", textAlign: "left", transition: "border-color 0.2s" }}
-            onMouseOver={e => e.currentTarget.style.borderColor = BLUE}
-            onMouseOut={e => e.currentTarget.style.borderColor = BLUE_BORDER}>
-            <div style={{ fontSize: 11, color: BLUE_BRIGHT, textTransform: "uppercase", letterSpacing: 2, fontWeight: 700, marginBottom: 12 }}>Live Draw Board</div>
-            <div style={{ fontSize: 20, fontWeight: 900, color: TEXT, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic", textTransform: "uppercase", marginBottom: 8 }}>Watch the Draw Board</div>
-            <div style={{ fontSize: 14, color: TEXT2, lineHeight: 1.6 }}>See the board reveal live — prize flashes, winner feed, and prize cabinet updating in real time.</div>
-          </button>
-          <button onClick={() => onNav("members")} style={{ background: NAVY3, border: `1px solid ${BORDER}`, borderRadius: 18, padding: "32px 28px", cursor: "pointer", textAlign: "left", transition: "border-color 0.2s" }}
-            onMouseOver={e => e.currentTarget.style.borderColor = BLUE_BORDER}
-            onMouseOut={e => e.currentTarget.style.borderColor = BORDER}>
-            <div style={{ fontSize: 11, color: TEXT3, textTransform: "uppercase", letterSpacing: 2, fontWeight: 700, marginBottom: 12 }}>Hall of Fame</div>
-            <div style={{ fontSize: 20, fontWeight: 900, color: TEXT, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic", textTransform: "uppercase", marginBottom: 8 }}>See Our Winners</div>
-            <div style={{ fontSize: 14, color: TEXT2, lineHeight: 1.6 }}>Recent prize draw winners and our Millionaire Hall of Fame — real LMCT+ members, real prizes.</div>
-          </button>
-        </div>
-
-        <div style={{ borderTop: `1px solid ${BORDER}`, paddingTop: 36, textAlign: "center" }}>
-          <p style={{ fontSize: 12, color: TEXT3, lineHeight: 1.9 }}>
-            PrizeTile is a membership reward draw system concept, built for LMCT+. · Accepts PAYMENT OPTIONS<br />
-            Tiles are randomly allocated and locked before each draw. Results are recorded and replayable. This system is a <strong style={{color:TEXT3}}>promotional member reward draw</strong> — not a gambling product. Subject to terms, conditions and legal review.<br />
-            <span style={{color:TEXT3, opacity:0.6}}>Prototype for demonstration purposes only. © LMCT+ 2025.</span>
-          </p>
         </div>
       </div>
     </div>
@@ -596,11 +526,11 @@ function TierCards({ onNav }) {
               background: key === "gold" ? "rgba(10,18,30,0.95)" : "rgba(8,14,26,0.80)",
               border: key === "gold" ? `2px solid ${GOLD}55` : `1px solid ${BORDER}`,
               borderRadius: 16, padding:"36px 32px", position:"relative", overflow:"hidden",
-              boxShadow: key === "gold" ? `0 0 60px rgba(255,215,0,0.12), 0 0 120px rgba(0,87,255,0.08)` : `0 0 40px rgba(0,87,255,0.06)`,
+              boxShadow: key === "gold" ? `0 0 60px rgba(39,216,255,0.13), 0 0 120px rgba(0,87,255,0.08)` : `0 0 40px rgba(0,87,255,0.06)`,
               backdropFilter:"blur(10px)",
             }}>
               {key === "gold" && (
-                <div style={{ position:"absolute", top:0, right:0, background:`linear-gradient(135deg,${GOLD},#FFA500)`, color:"#000", fontSize:11, fontWeight:900, padding:"7px 22px 7px 32px", clipPath:"polygon(18px 0,100% 0,100% 100%,0 100%)", fontFamily:"'Arial Black',Arial,sans-serif", letterSpacing:1.5 }}>MOST POPULAR</div>
+                <div style={{ position:"absolute", top:0, right:0, background:`linear-gradient(135deg,${GOLD},#27D8FF)`, color:"#000", fontSize:11, fontWeight:900, padding:"7px 22px 7px 32px", clipPath:"polygon(18px 0,100% 0,100% 100%,0 100%)", fontFamily:"'Arial Black',Arial,sans-serif", letterSpacing:1.5 }}>MOST POPULAR</div>
               )}
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
                 <div style={{ width: 14, height: 14, borderRadius: "50%", background: tier.color, boxShadow: `0 0 10px ${tier.glow}` }} />
@@ -2317,7 +2247,7 @@ export default function App() {
   const boardType = page.includes("monthly") ? "monthly" : "weekly";
 
   return (
-    <div style={{ fontFamily:"Arial, sans-serif", background:NAVY, minHeight:"100vh", position:"relative", overflowX:"hidden" }}>
+    <div style={{ fontFamily:"Arial, sans-serif", background:"radial-gradient(circle at 50% -15%, rgba(18,107,255,.18), transparent 34%), linear-gradient(180deg,#02060D 0%, #050B16 46%, #02060D 100%)", minHeight:"100vh", position:"relative", overflowX:"hidden" }}>
       <style>{`
         * { box-sizing:border-box; margin:0; padding:0; }
         button { font-family:inherit; }
@@ -2328,7 +2258,8 @@ export default function App() {
         ::-webkit-scrollbar-track { background:rgba(0,0,0,0.3); }
         ::-webkit-scrollbar-thumb { background:rgba(0,87,255,0.5); border-radius:3px; }
         ::-webkit-scrollbar-thumb:hover { background:rgba(0,195,255,0.7); }
-        input:focus { border-color:rgba(0,195,255,0.5) !important; box-shadow:0 0 0 2px rgba(0,195,255,0.12); }
+        input:focus { border-color:rgba(39,216,255,0.55) !important; box-shadow:0 0 0 2px rgba(39,216,255,0.12); }
+        @media (max-width: 900px) { .pt-responsive-grid { grid-template-columns:1fr !important; } }
       `}</style>
       {/* Global diagonal beam background */}
       <div style={{ position:"fixed", inset:0, pointerEvents:"none", zIndex:0, overflow:"hidden" }}>

@@ -1862,387 +1862,186 @@ function getActiveTier(tilesSold) {
 
 
 // ─── BONUS DRAW ───────────────────────────────────────────────────────────────
-// Gold members only · 10,000 LMCT+ Partner Vouchers · $1,000,000 in prizes
-// Demo uses 30 vouchers for speed; production draw uses 10,000 vouchers server-side.
-const BONUS_PRIZES = [
-  {
-    name: "LMCT+ Partner Voucher",
-    emoji: "🛒",
-    label: "LMCT+ Partner Voucher",
-    qty: 30,
-    remaining: 30,
-    color: BLUE_BRIGHT,
-    pause: 0,
-    isProduct: true,
-    realQty: 10000,
-    silent: true,
-  },
-];
-
+// Stable version: this page is intentionally self-contained so clicking the
+// Gold Bonus Draw button cannot crash the prototype before the draw starts.
 function BonusDraw({ onNav, profile, onDrawStateChange }) {
-  const tierKey = TIERS[profile?.tier] ? profile.tier : "gold";
-  const tier = TIERS[tierKey] || TIERS.gold;
+  const safeTierKey = TIERS?.[profile?.tier] ? profile.tier : "gold";
+  const tier = TIERS[safeTierKey] || TIERS.gold;
+  const [drawState, setDrawState] = useState("ready");
+  const [vouchersWon, setVouchersWon] = useState(0);
+  const [liveViewers, setLiveViewers] = useState(() => 4200 + Math.floor(Math.random() * 1800));
+  const [boardNum, setBoardNum] = useState(() => 48 + Math.floor(Math.random() * 5));
 
-  // Stable bonus tile IDs — generated once on mount, never change
-  const makeBonusTiles = () =>
-    tier.bonusAccess
-      ? Array.from({ length: tier.bonusTiles }, (_, i) => ({
-          id: `B${String(Math.floor(Math.random() * 999999) + 1).padStart(6,"0")}`,
-          status: i === 2 ? "win" : i < 8 ? "checked" : "pending",
-        }))
-      : [];
-  const [myBonusTiles, setMyBonusTiles] = useState(() => makeBonusTiles());
-
-  const [prizeState, setPrizeState]   = useState(() => BONUS_PRIZES.map(p => ({ ...p })));
-  const [liveViewers, setLiveViewers] = useState(() => 3200 + Math.floor(Math.random()*1800));
   useEffect(() => {
-    const iv = setInterval(() => setLiveViewers(v => Math.max(2000, v + Math.floor((Math.random()-0.45)*80))), 3000);
+    const iv = setInterval(() => {
+      setLiveViewers(v => Math.max(3500, v + Math.floor((Math.random() - 0.42) * 70)));
+    }, 2500);
     return () => clearInterval(iv);
   }, []);
-  const [drawState,  setDrawState]    = useState("idle");
-  const [tilesRevealed, setTilesRevealed] = useState(0);
-  const [winFeed,    setWinFeed]      = useState([]);
-  const [currentPrize, setCurrentPrize] = useState(null);
-  const [grid,       setGrid]         = useState(() => Array.from({ length: GRID_SIZE }, () => ({ state:"pending", prize:null })));
-  const [boardNum,   setBoardNum]     = useState(1);
-  const [scanLine,   setScanLine]     = useState(0);
-  const [demoPickerOpen, setDemoPickerOpen] = useState(false);
 
-  // Gold members only — total bonus board tiles = 60,000 Gold × 40 tiles = 2,400,000
-  // Use TOTAL_TILES cap for demo
-  const totalTiles = Math.min(TOTAL_TILES, 2400000);
-  const drawSpeed  = calcDrawSpeed(totalTiles);
+  const bonusTiles = Number(tier?.bonusTiles || 40);
+  const hasAccess = Boolean(tier?.bonusAccess || safeTierKey === "gold");
+  const voucherTarget = 10000;
+  const displayWinCount = Math.min(vouchersWon, 100);
+  const progress = drawState === "ready" ? 0 : Math.min(100, (displayWinCount / 100) * 100);
 
-  const runningRef = useRef(false);
-  const revealedRef = useRef(0);
-  const scanRef = useRef(null);
-
-  const stopDraw = useCallback(() => {
-    runningRef.current = false;
-    setDrawState("done");
-    onDrawStateChange?.(false);
-    if (scanRef.current) clearInterval(scanRef.current);
-  }, []);
-
-  const resetDraw = useCallback(() => {
-    runningRef.current = false;
-    revealedRef.current = 0;
-    if (scanRef.current) clearInterval(scanRef.current);
-    setTilesRevealed(0);
-    setDrawState("idle");
-    setWinFeed([]);
-    onDrawStateChange?.(false);
-    setPrizeState(BONUS_PRIZES.map(p => ({ ...p })));
-    setCurrentPrize(null);
-    setGrid(Array.from({ length: GRID_SIZE }, () => ({ state:"pending", prize:null })));
-    setBoardNum(b => b + 1);
-    setScanLine(0);
-    // Reset member tiles — fresh tile IDs and statuses for new draw
-    setMyBonusTiles(makeBonusTiles());
-  }, [tier.bonusTiles]);
-
-  const triggerWin = useCallback((prize) => {
-    const states = ["NSW","VIC","QLD","SA","WA","TAS","NT","ACT"];
-    const now = new Date();
-    const aest = new Date(now.getTime() + 10*60*60*1000);
-    const ts = aest.toISOString().slice(11,19) + " AEST";
-    const win = {
-      id: Date.now() + Math.random(),
-      tile: String(Math.floor(Math.random() * totalTiles) + 1).padStart(7,"0"),
-      member: String(Math.floor(Math.random() * 60000) + 1).padStart(5,"0"),
-      state: states[Math.floor(Math.random() * states.length)],
-      tier: "Gold",
-      prize, ts,
+  const myTiles = Array.from({ length: bonusTiles }, (_, i) => {
+    const n = String(805000 + i * 137 + ((i * 97) % 871)).padStart(6, "0");
+    return {
+      id: `B${n}`,
+      status: i === 2 ? "win" : i < 8 ? "checked" : "pending",
     };
-    setWinFeed(f => [win, ...f].slice(0, 200));
-    const idx = Math.floor(Math.random() * GRID_SIZE);
-    setGrid(g => { const ng=[...g]; ng[idx]={ state:"prize", prize }; return ng; });
-  }, [totalTiles]);
+  });
 
-  const runDraw = useCallback(() => {
-    if (runningRef.current) return;
-    runningRef.current = true;
+  const startDemoDraw = () => {
     setDrawState("running");
-    setCurrentPrize(null);
     onDrawStateChange?.(true);
-    const BATCH    = Math.max(10, Math.ceil(drawSpeed / 50));
-    const INTERVAL = 20;
-    let localPrizes = BONUS_PRIZES.map(p => ({ ...p }));
-    let allP = [];
-    for (const p of localPrizes) for (let i=0; i<p.qty; i++) allP.push({ ...p });
-    const prizePositions = buildSpreadPrizePositions(allP, totalTiles);
-    let sl = 0;
-    scanRef.current = setInterval(() => { sl = (sl+1) % GRID_ROWS; setScanLine(sl); }, 60);
-
-    const revealStep = () => {
-      if (!runningRef.current) return;
-      for (let b=0; b<BATCH; b++) {
-        revealedRef.current++;
-        const tileNum = revealedRef.current;
-        const gridIdx = tileNum % GRID_SIZE;
-        if (prizePositions.has(tileNum)) {
-          const prize = prizePositions.get(tileNum);
-          const pi = localPrizes.findIndex(p => p.name===prize.name && p.remaining>0);
-          if (pi >= 0) {
-            localPrizes[pi].remaining--;
-            setPrizeState(localPrizes.map(p => ({ ...p })));
-            triggerWin(prize);
-            setTilesRevealed(revealedRef.current);
-            // Vouchers are always silent — just feed update, no popup
-            setGrid(g => { const ng=[...g]; ng[gridIdx]={ state:"prize", prize }; return ng; });
-          }
-        } else {
-          setGrid(g => { const ng=[...g]; ng[gridIdx]={ state:"empty", prize:null }; return ng; });
-        }
+    setVouchersWon(0);
+    let i = 0;
+    const iv = setInterval(() => {
+      i += 4 + Math.floor(Math.random() * 5);
+      setVouchersWon(Math.min(i, 100));
+      if (i >= 100) {
+        clearInterval(iv);
+        setDrawState("complete");
+        onDrawStateChange?.(false);
       }
-      setTilesRevealed(revealedRef.current);
-      if (revealedRef.current >= totalTiles || !runningRef.current) { stopDraw(); return; }
-      setTimeout(revealStep, INTERVAL);
-    };
-    setTimeout(revealStep, INTERVAL);
-  }, [totalTiles, drawSpeed, triggerWin, stopDraw]);
+    }, 120);
+  };
 
-  const simulateWin = useCallback(() => {
-    const prize = BONUS_PRIZES[0];
-    triggerWin(prize);
-    setCurrentPrize(prize);
-    setTimeout(() => setCurrentPrize(null), prize.pause);
-    setDemoPickerOpen(false);
-  }, [triggerWin]);
+  const resetDemoDraw = () => {
+    setDrawState("ready");
+    setVouchersWon(0);
+    setBoardNum(n => n + 1);
+    onDrawStateChange?.(false);
+  };
 
-  const pct = Math.min(100, (tilesRevealed / totalTiles) * 100);
-  const vouchersWon = BONUS_PRIZES[0].qty - prizeState[0].remaining;
-  const vouchersLeft = prizeState[0].remaining;
+  const triggerWin = () => {
+    setDrawState("running");
+    onDrawStateChange?.(true);
+    setVouchersWon(v => Math.min(100, v + 1));
+    setTimeout(() => onDrawStateChange?.(false), 800);
+  };
 
-  if (!tier.bonusAccess) {
+  if (!hasAccess) {
     return (
-      <div style={{ background:"transparent", minHeight:"100vh", color:TEXT, display:"flex", alignItems:"center", justifyContent:"center" }}>
-        <div style={{ textAlign:"center", maxWidth:480, padding:40 }}>
-          <div style={{ fontSize:48, marginBottom:20 }}>★</div>
-          <div style={{ fontSize:28, fontWeight:900, color:GOLD, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", marginBottom:16 }}>Gold Members Only</div>
-          <div style={{ fontSize:16, color:TEXT2, marginBottom:32, lineHeight:1.7 }}>The $1,000,000 Gold Bonus Draw is exclusive to Gold members. Upgrade to Gold to access 40 bonus tiles and compete in 10,000 vouchers given away every month.</div>
-          <button onClick={() => onNav("tiers")} style={{ background:`linear-gradient(135deg,${BLUE_BRIGHT},${GOLD})`, border:"none", borderRadius:12, padding:"16px 40px", color:"#000", fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", fontSize:18, cursor:"pointer" }}>
-            UPGRADE TO GOLD →
-          </button>
-          <div style={{ marginTop:16 }}>
-            <button onClick={() => onNav("draw")} style={{ background:"transparent", color:TEXT3, border:"none", fontSize:13, cursor:"pointer" }}>← Back to Main Draw</button>
-          </div>
+      <div style={{ minHeight:"100vh", color:TEXT, display:"flex", alignItems:"center", justifyContent:"center", padding:32 }}>
+        <div style={{ maxWidth:540, background:"rgba(5,14,28,0.96)", border:`1px solid ${BLUE_BORDER}`, borderRadius:22, padding:42, textAlign:"center", boxShadow:"0 28px 90px rgba(0,0,0,0.55)" }}>
+          <div style={{ fontSize:13, color:BLUE_BRIGHT, fontWeight:900, letterSpacing:3, textTransform:"uppercase", marginBottom:14 }}>Gold Bonus Draw</div>
+          <div style={{ fontSize:34, color:TEXT, fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", marginBottom:14 }}>Gold Members Only</div>
+          <div style={{ color:TEXT2, lineHeight:1.7, marginBottom:28 }}>This board is exclusive to Gold members. Upgrade to Gold to unlock 40 bonus tiles and compete in the monthly $1,000,000 voucher pool.</div>
+          <BlueBtn onClick={() => onNav("tiers")}>VIEW GOLD TIER →</BlueBtn>
         </div>
       </div>
     );
   }
 
-  return (
-    <div style={{ background:"transparent", minHeight:"100vh", color:TEXT }}>
-      <style>{`@keyframes bonusGlow { 0%,100%{box-shadow:0 0 20px ${GOLD}44} 50%{box-shadow:0 0 50px ${GOLD}88,0 0 80px ${GOLD}44} }`}</style>
+  const winnerRows = Array.from({ length: Math.min(displayWinCount, 8) }, (_, i) => ({
+    member: String(70000 + i * 37 + boardNum).padStart(6, "0"),
+    state: ["VIC", "NSW", "QLD", "WA", "SA", "TAS", "ACT", "NT"][i % 8],
+    tile: String(800000 + i * 641 + boardNum).padStart(7, "0"),
+  }));
 
-      {/* Sub-nav */}
-      <div style={{ background:"rgba(6,12,24,0.98)", backdropFilter:"blur(12px)", borderBottom:`1px solid ${BLUE_BORDER}`, padding:"10px 24px", display:"flex", alignItems:"center", gap:12, flexWrap:"wrap" }}>
-        <button onClick={() => onNav("draw")} style={{ background:"transparent", border:`1px solid ${BORDER2}`, borderRadius:6, padding:"6px 14px", color:TEXT2, cursor:"pointer", fontSize:13 }}>← Main Draw</button>
-        <div style={{ display:"flex", alignItems:"center", gap:8, background:"rgba(4,14,26,0.94)", border:`1px solid rgba(0,245,160,0.38)`, borderRadius:20, padding:"6px 16px" }}>
-          <span style={{ fontSize:14 }}>★</span>
-          <span style={{ fontSize:13, color:GOLD, fontWeight:700, textTransform:"uppercase", letterSpacing:1.5 }}>$1M Gold Bonus Draw</span>
+  return (
+    <div style={{ minHeight:"100vh", color:TEXT }}>
+      <div style={{ background:"rgba(3,8,15,0.96)", backdropFilter:"blur(16px)", borderBottom:`1px solid ${BLUE_BORDER}`, padding:"12px 24px", display:"flex", alignItems:"center", gap:12, flexWrap:"wrap" }}>
+        <button onClick={() => onNav("draw")} style={{ background:"rgba(7,18,34,0.92)", border:`1px solid ${BORDER2}`, borderRadius:8, padding:"8px 14px", color:TEXT2, cursor:"pointer", fontSize:13 }}>← Main Draw</button>
+        <div style={{ display:"flex", alignItems:"center", gap:9, background:"rgba(0,195,255,0.08)", border:`1px solid ${BLUE_BORDER}`, borderRadius:22, padding:"7px 16px" }}>
+          <span style={{ color:BLUE_BRIGHT }}>✦</span>
+          <span style={{ fontSize:13, color:BLUE_BRIGHT, fontWeight:900, textTransform:"uppercase", letterSpacing:1.8 }}>$1M Gold Bonus Draw</span>
         </div>
-        <div style={{ marginLeft:"auto", display:"flex", gap:10, alignItems:"center" }}>
-          <div style={{ display:"flex", alignItems:"center", gap:6, background:"rgba(5,14,28,0.94)", border:"1px solid rgba(73,217,255,0.18)", borderRadius:20, padding:"4px 12px" }}>
-            <div style={{ width:6, height:6, borderRadius:"50%", background:BLUE_BRIGHT, animation:"livePulse 1.5s ease-in-out infinite" }} />
-            <span style={{ fontSize:12, color:BLUE_BRIGHT, fontWeight:700 }}>{liveViewers.toLocaleString()} watching</span>
-          </div>
-          <span style={{ fontSize:11, color:TEXT3, textTransform:"uppercase", letterSpacing:1.5 }}>Board #{String(boardNum).padStart(3,"0")}</span>
-          <div style={{ display:"flex", alignItems:"center", gap:6, background:drawState==="paused"?"rgba(0,245,160,0.14)":BLUE_DIM, border:`1px solid ${drawState==="paused"?`${GOLD}44`:BLUE_BORDER}`, borderRadius:20, padding:"4px 14px" }}>
-            <span style={{ width:6, height:6, borderRadius:"50%", background:drawState==="running"?BLUE_BRIGHT:drawState==="paused"?GOLD:"#555", display:"inline-block" }} />
-            <span style={{ fontSize:12, color:drawState==="running"?BLUE_BRIGHT:drawState==="paused"?GOLD:TEXT3, fontWeight:700, textTransform:"uppercase", letterSpacing:1 }}>
-              {drawState==="running"?"● LIVE":drawState==="paused"?"★ WINNER!":drawState==="done"?"✓ COMPLETE":"READY"}
-            </span>
-          </div>
+        <div style={{ marginLeft:"auto", display:"flex", gap:10, alignItems:"center", flexWrap:"wrap" }}>
+          <div style={{ background:"rgba(0,195,255,0.08)", border:`1px solid ${BLUE_BORDER}`, borderRadius:20, padding:"5px 12px", fontSize:12, color:BLUE_BRIGHT, fontWeight:800 }}>● {liveViewers.toLocaleString()} watching</div>
+          <div style={{ color:TEXT3, fontSize:11, textTransform:"uppercase", letterSpacing:1.4 }}>Board #{String(boardNum).padStart(3,"0")}</div>
+          <div style={{ background:drawState === "complete" ? "rgba(0,230,118,0.10)" : BLUE_DIM, border:`1px solid ${drawState === "complete" ? GREEN_BORDER : BLUE_BORDER}`, borderRadius:20, padding:"5px 12px", fontSize:12, color:drawState === "complete" ? GREEN : BLUE_BRIGHT, fontWeight:900, textTransform:"uppercase", letterSpacing:1 }}>{drawState === "ready" ? "Ready" : drawState === "complete" ? "Complete" : "Live"}</div>
         </div>
       </div>
 
-      <div style={{ maxWidth:1280, margin:"0 auto", padding:"20px 24px" }}>
-
-        {/* Header strip */}
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:12, marginBottom:20 }}>
+      <div style={{ maxWidth:1240, margin:"0 auto", padding:"30px 24px 70px" }}>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:14, marginBottom:22 }} className="pt-responsive-grid">
           {[
-            { label:"Draw",          val:"Gold Bonus Draw",  color:GOLD },
-            { label:"Prize Pool",    val:"$1,000,000",       color:CHAMPAGNE },
-            { label:"Vouchers",      val:"10,000 × $100",    color:BLUE_BRIGHT },
-            { label:"Your Tiles",    val:`${tier.bonusTiles} tiles`, color:GOLD },
+            { label:"Draw", val:"Gold Bonus Draw" },
+            { label:"Prize Pool", val:"$1,000,000" },
+            { label:"Vouchers", val:"10,000 × $100" },
+            { label:"Your Tiles", val:`${bonusTiles} tiles` },
           ].map(s => (
-            <div key={s.label} style={{ background:NAVY3, border:`1px solid rgba(73,217,255,0.18)`, borderRadius:12, padding:"14px 16px" }}>
-              <div style={{ fontSize:10, color:TEXT3, textTransform:"uppercase", letterSpacing:1, marginBottom:6 }}>{s.label}</div>
-              <div style={{ fontSize:16, fontWeight:900, color:s.color, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic" }}>{s.val}</div>
+            <div key={s.label} style={{ background:"rgba(5,14,28,0.96)", border:`1px solid ${BLUE_BORDER}`, borderRadius:14, padding:"16px 18px", boxShadow:"0 18px 55px rgba(0,0,0,0.35)" }}>
+              <div style={{ fontSize:10, color:TEXT3, textTransform:"uppercase", letterSpacing:1.4, marginBottom:7 }}>{s.label}</div>
+              <div style={{ fontSize:17, color:BLUE_BRIGHT, fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic" }}>{s.val}</div>
             </div>
           ))}
         </div>
 
-        {/* Silent wins — no popup. Winner count shown in progress bar */}
-        {vouchersWon > 0 && drawState === "paused" && null /* never pauses for vouchers */}
-
-
-        <div style={{ display:"grid", gridTemplateColumns:"1fr 300px", gap:20, alignItems:"start" }}>
-          {/* Board */}
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 300px", gap:22, alignItems:"start" }} className="pt-responsive-grid">
           <div>
-            {/* Progress bar with live winner count */}
-            <div style={{ background:NAVY3, border:`1px solid rgba(73,217,255,0.18)`, borderRadius:12, padding:"14px 20px", marginBottom:14 }}>
-              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
-                <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-                  <span style={{ fontSize:12, color:TEXT3 }}>Gold Bonus Draw in Progress</span>
-                  {vouchersWon > 0 && (
-                    <div style={{ background:`${GOLD}22`, border:`1px solid rgba(0,245,160,0.38)`, borderRadius:20, padding:"3px 12px", display:"flex", alignItems:"center", gap:6 }}>
-                      <span style={{ fontSize:14 }}>🛒</span>
-                      <span style={{ fontSize:13, color:GOLD, fontWeight:900 }}>{vouchersWon.toLocaleString()} vouchers won</span>
-                    </div>
-                  )}
-                </div>
-                <div style={{ display:"flex", gap:8, alignItems:"center" }}>
-                  <span style={{ background:"rgba(4,14,26,0.95)", border:`1px solid rgba(0,245,160,0.38)`, borderRadius:10, padding:"2px 8px", fontSize:10, color:GOLD, fontWeight:700 }}>DEMO MODE</span>
-                  <span style={{ color:TEXT3, fontSize:12 }}>{pct.toFixed(1)}%</span>
-                </div>
+            <div style={{ background:"rgba(5,14,28,0.96)", border:`1px solid ${BLUE_BORDER}`, borderRadius:14, padding:"16px 20px", marginBottom:16, boxShadow:"0 18px 60px rgba(0,0,0,0.45)" }}>
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:10, gap:12 }}>
+                <span style={{ fontSize:12, color:TEXT2 }}>{drawState === "ready" ? "Gold Bonus Draw ready" : drawState === "complete" ? "Gold Bonus Draw complete" : "Gold Bonus Draw in progress"}</span>
+                <span style={{ fontSize:12, color:BLUE_BRIGHT, fontWeight:900 }}>{progress.toFixed(1)}%</span>
               </div>
-              <div style={{ height:5, background:NAVY4, borderRadius:3, overflow:"hidden" }}>
-                <div style={{ height:"100%", width:pct+"%", background:`linear-gradient(90deg,${BLUE_BRIGHT},${GOLD},${BLUE})`, borderRadius:3, transition:"width 0.2s", boxShadow:`0 0 8px ${GOLD}88` }} />
+              <div style={{ height:6, background:"rgba(255,255,255,0.06)", borderRadius:4, overflow:"hidden" }}>
+                <div style={{ height:"100%", width:`${progress}%`, background:`linear-gradient(90deg, ${BLUE}, ${BLUE_BRIGHT}, ${GREEN})`, boxShadow:`0 0 14px ${BLUE_BRIGHT}`, transition:"width 0.2s" }} />
               </div>
             </div>
 
-            {/* Grid */}
-            <div style={{ background:"#030913", border:`1px solid rgba(73,217,255,0.18)`, borderRadius:16, padding:14, marginBottom:14, position:"relative", overflow:"hidden" }}>
-              {drawState==="running" && (
-                <div style={{ position:"absolute", left:14, right:14, height:`${100/GRID_ROWS}%`, top:`calc(14px + ${scanLine}*(${100/GRID_ROWS}%))`, background:`linear-gradient(180deg,transparent,rgba(73,217,255,0.24),rgba(0,245,160,0.12),transparent)`, pointerEvents:"none", zIndex:2 }} />
-              )}
-              <div style={{ display:"grid", gridTemplateColumns:`repeat(${GRID_COLS},1fr)`, gap:2.5, position:"relative", zIndex:1 }}>
-                {grid.map((cell,i) => {
-                  const isPrize = cell.state==="prize";
-                  const isEmpty = cell.state==="empty";
-                  const isRunning = drawState==="running" || drawState==="paused";
+            <div style={{ background:"rgba(1,6,14,0.96)", border:`1px solid rgba(0,195,255,0.18)`, borderRadius:18, padding:16, marginBottom:16, boxShadow:"0 25px 90px rgba(0,0,0,0.65)" }}>
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(25,1fr)", gap:3 }}>
+                {Array.from({ length: 400 }, (_, i) => {
+                  const hit = drawState !== "ready" && (i === 42 || i === 133 || i === 268 || (displayWinCount > 40 && i === 311));
+                  const lit = drawState === "running" && i % 37 < 3;
                   return (
-                    <div key={i} style={{
-                      aspectRatio:"1", borderRadius:2,
-                      background: isPrize ? GOLD : isEmpty ? "#03070F" : "#0B1626",
-                      boxShadow: isPrize ? `0 0 10px ${GOLD}88` : "none",
-                      animation: isPrize ? "none" : isRunning ? `tileCycle ${1.2+(i%12)*0.1}s ease-in-out infinite` : "none",
-                    }} />
+                    <div key={i} style={{ aspectRatio:"1", borderRadius:3, background:hit ? BLUE_BRIGHT : lit ? "rgba(0,195,255,0.28)" : "rgba(10,22,42,0.72)", boxShadow:hit ? `0 0 22px ${BLUE_BRIGHT}` : lit ? `0 0 8px ${BLUE_BRIGHT}55` : "none", opacity:drawState === "ready" ? 0.72 : 1 }} />
                   );
                 })}
               </div>
             </div>
 
-            {/* Controls */}
             <div style={{ display:"flex", gap:12, flexWrap:"wrap", marginBottom:16 }}>
-              {drawState==="idle" || drawState==="done" ? (
-                <button onClick={() => drawState==="done" ? resetDraw() : runDraw()} style={{ background:`linear-gradient(135deg,${BLUE_BRIGHT},${GOLD})`, border:"none", borderRadius:8, padding:"14px 36px", color:"#000", fontWeight:900, fontSize:16, cursor:"pointer", fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic" }}>
-                  {drawState==="done" ? "⟳ NEW DRAW" : "★ START GOLD BONUS DRAW"}
-                </button>
+              {drawState === "ready" || drawState === "complete" ? (
+                <button onClick={drawState === "complete" ? resetDemoDraw : startDemoDraw} style={{ background:`linear-gradient(135deg, ${BLUE_BRIGHT}, ${BLUE})`, border:"none", borderRadius:10, padding:"14px 34px", color:TEXT, fontWeight:900, fontSize:16, cursor:"pointer", fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", boxShadow:`0 0 28px rgba(0,195,255,0.32)` }}>{drawState === "complete" ? "⟳ NEW DRAW" : "✦ START GOLD BONUS DRAW"}</button>
               ) : (
-                <button onClick={stopDraw} style={{ background:"transparent", color:"#FF6060", border:"2px solid #FF606044", borderRadius:8, padding:"14px 32px", fontWeight:700, fontSize:15, cursor:"pointer" }}>■ Stop</button>
+                <button onClick={() => { setDrawState("complete"); onDrawStateChange?.(false); }} style={{ background:"transparent", border:"1px solid rgba(255,80,95,0.38)", borderRadius:10, padding:"14px 28px", color:"#FF6B7B", fontWeight:800, cursor:"pointer" }}>■ Stop</button>
               )}
-              <button onClick={() => { simulateWin(); setDemoPickerOpen(false); }} style={{ background:"rgba(4,14,26,0.95)", color:GOLD, border:`1px solid rgba(0,245,160,0.38)`, borderRadius:8, padding:"14px 22px", fontWeight:700, fontSize:15, cursor:"pointer" }}>
-                ✦ DEMO: TRIGGER WIN
-              </button>
-              {drawState !== "idle" && <button onClick={resetDraw} style={{ background:"transparent", color:TEXT2, border:`1px solid ${BORDER}`, borderRadius:8, padding:"14px 24px", fontSize:15, cursor:"pointer" }}>Reset</button>}
+              <button onClick={triggerWin} style={{ background:"rgba(5,14,28,0.94)", border:`1px solid ${BLUE_BORDER}`, borderRadius:10, padding:"14px 22px", color:BLUE_BRIGHT, fontWeight:800, cursor:"pointer" }}>✦ Demo: Trigger Win</button>
             </div>
 
-            {/* Demo note */}
-            <div style={{ background:"rgba(3,10,22,0.94)", border:`1px solid rgba(73,217,255,0.22)`, borderRadius:10, padding:"10px 16px", marginBottom:14, display:"flex", gap:10, alignItems:"center" }}>
-              <span style={{ fontSize:14 }}>ℹ️</span>
-              <div style={{ fontSize:11, color:TEXT3 }}>
-                <strong style={{color:TEXT2}}>Demo mode</strong> — showing 100 voucher winners (~1 min). 
-                Real Gold Bonus Draw: 10,000 LMCT+ Partner Vouchers given away. Runs server-side.
-              </div>
-            </div>
-
-            {/* My bonus tiles */}
-            <div style={{ background:NAVY3, border:`1px solid rgba(73,217,255,0.22)`, borderRadius:14, padding:"18px 20px" }}>
-              <div style={{ fontSize:11, color:GOLD, textTransform:"uppercase", letterSpacing:2, marginBottom:14, fontWeight:700, display:"flex", alignItems:"center", gap:8 }}>
-                <div style={{ width:3, height:14, background:`linear-gradient(${BLUE_BRIGHT},${GOLD})`, borderRadius:2 }} />
-                My Gold Bonus Tiles — {tier.bonusTiles} allocated
-              </div>
-              <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
-                {myBonusTiles.slice(0, 40).map((t,i) => {
-                  const isWin     = t.status === "win";
-                  const isChecked = t.status === "checked";
-                  if (isWin) return (
-                    <div key={i} style={{ background:`${GOLD}22`, border:`2px solid ${GOLD}`, borderRadius:8, padding:"6px 10px", fontSize:11, color:GOLD, fontFamily:"monospace", fontWeight:700, boxShadow:`0 0 10px ${GOLD}66`, animation:"tileWinPulse 1.4s ease-in-out infinite", display:"flex", flexDirection:"column", alignItems:"center", gap:2, minWidth:90, textAlign:"center" }}>
-                      <span style={{ fontSize:16 }}>•</span>
-                      <span style={{ fontSize:9, color:GOLD, fontWeight:900, textTransform:"uppercase", letterSpacing:0.5 }}>WINNER</span>
-                      <span style={{ fontSize:10, color:GOLD, fontWeight:700 }}>Partner Voucher</span>
-                      <span style={{ fontSize:10, color:CHAMPAGNE, fontWeight:900 }}>$100</span>
-                      <span style={{ fontSize:8, color:`${GOLD}88`, marginTop:2 }}>#{t.id}</span>
-                    </div>
-                  );
-                  if (isChecked) return (
-                    <div key={i} style={{ background:"rgba(255,255,255,0.02)", border:`1px solid ${BORDER}`, borderRadius:6, padding:"5px 10px", fontSize:11, color:TEXT3, fontFamily:"monospace", opacity:0.45, textDecoration:"line-through" }}>
-                      #{t.id}
-                    </div>
-                  );
+            <div style={{ background:"rgba(5,14,28,0.96)", border:`1px solid ${BLUE_BORDER}`, borderRadius:16, padding:"18px 20px" }}>
+              <div style={{ fontSize:11, color:BLUE_BRIGHT, textTransform:"uppercase", letterSpacing:2, marginBottom:14, fontWeight:900 }}>My Gold Bonus Tiles — {bonusTiles} allocated</div>
+              <div style={{ display:"flex", flexWrap:"wrap", gap:7 }}>
+                {myTiles.map((t, i) => {
+                  const win = t.status === "win";
+                  const checked = t.status === "checked";
                   return (
-                    <div key={i} style={{ background:NAVY4, border:`1px solid rgba(73,217,255,0.22)`, borderRadius:6, padding:"5px 10px", fontSize:11, color:GOLD, fontFamily:"monospace", fontWeight:700 }}>
-                      #{t.id}
+                    <div key={t.id} style={{ minWidth:win ? 106 : undefined, background:win ? "rgba(0,195,255,0.16)" : checked ? "rgba(255,255,255,0.025)" : "rgba(10,22,42,0.86)", border:`1px solid ${win ? BLUE_BRIGHT : checked ? "rgba(255,255,255,0.06)" : BLUE_BORDER}`, borderRadius:8, padding:win ? "8px 10px" : "6px 10px", color:win ? BLUE_BRIGHT : checked ? TEXT3 : TEXT2, fontSize:11, fontFamily:"monospace", fontWeight:win ? 900 : 700, textDecoration:checked ? "line-through" : "none", boxShadow:win ? `0 0 20px ${BLUE_BRIGHT}55` : "none", textAlign:"center" }}>
+                      {win ? <><div style={{ fontSize:10, textTransform:"uppercase", letterSpacing:1 }}>Winner</div><div>Voucher $100</div><div style={{ opacity:.7 }}>#{t.id}</div></> : <>#{t.id}</>}
                     </div>
                   );
                 })}
-                {tier.bonusTiles > 40 && <div style={{ fontSize:11, color:TEXT3, alignSelf:"center" }}>+{tier.bonusTiles-40} more</div>}
-              </div>
-              <div style={{ marginTop:12, fontSize:11, color:TEXT3 }}>
-                Tiles randomly allocated · Gold Bonus Draw · Same Saturday night as Monthly Millionaire
               </div>
             </div>
           </div>
 
-          {/* Right sidebar */}
-          <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
-
-            {/* Prize cabinet — vouchers only */}
-            <div style={{ background:NAVY3, border:`1px solid rgba(73,217,255,0.22)`, borderRadius:16, padding:"18px 18px" }}>
-              <div style={{ fontSize:11, fontWeight:700, color:GOLD, textTransform:"uppercase", letterSpacing:2, marginBottom:14, display:"flex", alignItems:"center", gap:8 }}>
-                <div style={{ width:3, height:14, background:`linear-gradient(${BLUE_BRIGHT},${GOLD})`, borderRadius:2 }} />
-                Prize Cabinet
-              </div>
-              <div style={{ background:NAVY4, borderRadius:10, padding:"14px 14px" }}>
-                <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:10 }}>
-                  <span style={{ fontSize:24 }}>•</span>
-                  <div>
-                    <div style={{ fontSize:14, fontWeight:900, color:GOLD, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic" }}>LMCT+ Partner Voucher</div>
-                    <div style={{ fontSize:11, color:TEXT3 }}>$100 value each</div>
-                  </div>
-                </div>
-                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                  <div style={{ fontSize:11, color:TEXT3 }}>Won so far</div>
-                  <div style={{ fontSize:18, fontWeight:900, color:vouchersWon>0?BLUE_BRIGHT:TEXT3, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic" }}>{vouchersWon.toLocaleString()} / 10,000</div>
-                </div>
-                <div style={{ height:4, background:NAVY3, borderRadius:2, marginTop:8, overflow:"hidden" }}>
-                  <div style={{ height:"100%", width:`${(vouchersWon/10000)*100}%`, background:`linear-gradient(90deg,${BLUE_BRIGHT},${GOLD},${BLUE})`, borderRadius:2 }} />
-                </div>
-                <div style={{ fontSize:11, color:TEXT3, marginTop:6, textAlign:"right" }}>{vouchersLeft.toLocaleString()} remaining</div>
-              </div>
-              <div style={{ marginTop:10, background:BLUE_DIM, border:`1px solid ${BLUE_BORDER}`, borderRadius:8, padding:"8px 12px", fontSize:11, color:GOLD, textAlign:"center" }}>
-                $1,000,000 in vouchers · Gold members only
+          <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
+            <div style={{ background:"rgba(5,14,28,0.96)", border:`1px solid ${BLUE_BORDER}`, borderRadius:18, padding:"20px 18px", boxShadow:"0 22px 70px rgba(0,0,0,0.48)" }}>
+              <div style={{ fontSize:11, color:BLUE_BRIGHT, fontWeight:900, textTransform:"uppercase", letterSpacing:2, marginBottom:14 }}>Prize Cabinet</div>
+              <div style={{ background:"rgba(10,22,42,0.88)", borderRadius:12, padding:"16px" }}>
+                <div style={{ fontSize:15, color:TEXT, fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", marginBottom:3 }}>🛒 LMCT+ Partner Voucher</div>
+                <div style={{ fontSize:12, color:TEXT3, marginBottom:16 }}>$100 value each</div>
+                <div style={{ display:"flex", justifyContent:"space-between", color:TEXT2, fontSize:12, marginBottom:8 }}><span>Won so far</span><strong style={{ color:BLUE_BRIGHT }}>{displayWinCount.toLocaleString()} / {voucherTarget.toLocaleString()}</strong></div>
+                <div style={{ height:5, background:"rgba(255,255,255,0.06)", borderRadius:3, overflow:"hidden" }}><div style={{ height:"100%", width:`${(displayWinCount / 100) * 100}%`, background:`linear-gradient(90deg, ${BLUE_BRIGHT}, ${GREEN})` }} /></div>
               </div>
             </div>
 
-            {/* Live winners */}
-            <div style={{ background:NAVY3, border:`1px solid rgba(73,217,255,0.22)`, borderRadius:16, padding:"18px 18px", flex:1 }}>
-              <div style={{ fontSize:11, fontWeight:700, color:GOLD, textTransform:"uppercase", letterSpacing:2, marginBottom:14, display:"flex", alignItems:"center", gap:8 }}>
-                <div style={{ width:3, height:14, background:`linear-gradient(${BLUE_BRIGHT},${GOLD})`, borderRadius:2 }} />
-                Live Winners
-                {winFeed.length > 0 && <span style={{ marginLeft:"auto", background:"rgba(0,245,160,0.10)", color:GOLD, fontSize:11, fontWeight:700, padding:"2px 8px", borderRadius:10 }}>{winFeed.length}</span>}
-              </div>
-              <div style={{ display:"flex", justifyContent:"space-between", fontSize:11, color:TEXT3, marginBottom:10, padding:"6px 10px", background:NAVY4, borderRadius:8 }}>
-                <span>• Vouchers won</span>
-                <span style={{ color:vouchersWon>0?GOLD:TEXT3, fontWeight:700 }}>{vouchersWon.toLocaleString()} / 10,000</span>
-              </div>
-              {winFeed.length === 0 ? (
-                <div style={{ textAlign:"center", padding:"16px 0", color:TEXT3, fontSize:12 }}>
-                  {drawState==="idle" ? "Start the draw to see winners" : "Watching for winners..."}
-                </div>
+            <div style={{ background:"rgba(5,14,28,0.96)", border:`1px solid ${BLUE_BORDER}`, borderRadius:18, padding:"20px 18px", minHeight:280 }}>
+              <div style={{ fontSize:11, color:BLUE_BRIGHT, fontWeight:900, textTransform:"uppercase", letterSpacing:2, marginBottom:14 }}>Live Winners</div>
+              {winnerRows.length === 0 ? (
+                <div style={{ textAlign:"center", padding:"42px 0", color:TEXT3, fontSize:13 }}>Start the draw to see winners</div>
               ) : (
-                <div style={{ display:"flex", flexDirection:"column", gap:5, maxHeight:400, overflowY:"auto" }}>
-                  {winFeed.map((w,idx) => (
-                    <div key={w.id} style={{ display:"flex", alignItems:"center", gap:8, borderLeft:`3px solid ${GOLD}`, background:NAVY4, borderRadius:"0 8px 8px 0", padding:"7px 10px", animation:idx===0?"feedSlide 0.2s ease-out":"none" }}>
-                      <span style={{ fontSize:14 }}>🛒</span>
-                      <div style={{ flex:1, minWidth:0 }}>
-                        <div style={{ fontSize:12, fontWeight:700, color:GOLD, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic" }}>Partner Voucher · $100</div>
-                        <div style={{ fontSize:10, color:TEXT3 }}>Gold #{w.member} · {w.state} · tile #{w.tile} · {w.ts}</div>
-                      </div>
+                <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                  {winnerRows.map((w, i) => (
+                    <div key={w.tile} style={{ background:"rgba(10,22,42,0.86)", borderLeft:`3px solid ${BLUE_BRIGHT}`, borderRadius:"0 10px 10px 0", padding:"9px 12px" }}>
+                      <div style={{ color:BLUE_BRIGHT, fontSize:12, fontWeight:900 }}>🛒 Partner Voucher · $100</div>
+                      <div style={{ color:TEXT3, fontSize:10, marginTop:3 }}>Gold #{w.member} · {w.state} · tile #{w.tile}</div>
                     </div>
                   ))}
                 </div>
@@ -2250,10 +2049,15 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
             </div>
           </div>
         </div>
+
+        <div style={{ marginTop:18, background:"rgba(5,14,28,0.90)", border:`1px solid ${BLUE_BORDER}`, borderRadius:12, padding:"12px 16px", color:TEXT3, fontSize:12 }}>
+          Demo mode — simplified, stable Gold Bonus Board for presentation. Production draw would process all 10,000 voucher wins server-side and push live events to each member browser.
+        </div>
       </div>
     </div>
   );
 }
+
 
 // ─── ROOT ─────────────────────────────────────────────────────────────────────
 const DEFAULT_PROFILE = { id:"00001", name:"Paul R.", state:"VIC", tier:"gold", avatar:"★" };

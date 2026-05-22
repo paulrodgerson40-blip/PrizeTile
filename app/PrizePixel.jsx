@@ -2007,7 +2007,7 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
         // The bonus card stays face-down/clean during the scan.
         // Only the actual winning player tile flips, so the card is not cluttered
         // with dimmed/struck-out tiles during or after the demo draw.
-        const revealUpto = Math.min(order.length, tick);
+        const revealUpto = Math.min(order.length, Math.floor(tick / 2));
         for (let j = 0; j < revealUpto; j++) {
           const idx = order[j];
           if (!next[idx] || next[idx].status !== "pending") continue;
@@ -2032,7 +2032,7 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
         setWinnerRows(rows => [...rowsToAdd, ...rows].slice(0, 8));
       }
 
-      setRevealedCount(c => Math.min(bonusTiles, c + 1));
+      setRevealedCount(Math.min(bonusTiles, Math.floor(tick / 2)));
 
       if (voucherCount >= demoVoucherTarget) {
         clearBonusTimer();
@@ -2153,8 +2153,25 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
                   const win = t.status === "win";
                   const scanned = t.revealedOrder && !win;
                   return (
-                    <div key={t.id} style={{ minWidth:win ? 116 : undefined, background:win ? "rgba(0,195,255,0.18)" : "rgba(10,22,42,0.92)", border:`1px solid ${win ? BLUE_BRIGHT : scanned ? "rgba(0,195,255,0.18)" : BLUE_BORDER}`, borderRadius:8, padding:win ? "8px 10px" : "6px 10px", color:win ? BLUE_BRIGHT : TEXT2, fontSize:11, fontFamily:"monospace", fontWeight:win ? 900 : 700, textDecoration:"none", boxShadow:win ? `0 0 22px ${BLUE_BRIGHT}66` : scanned ? "inset 0 0 0 1px rgba(0,195,255,0.05)" : "none", textAlign:"center", transition:"all 0.2s" }}>
-                      {win ? <><div style={{ fontSize:10, textTransform:"uppercase", letterSpacing:1, color:GREEN }}>Winner</div><div>Voucher $100</div><div style={{ opacity:.75 }}>#{t.id}</div></> : <>#{t.id}</>}
+                    <div key={t.id} style={{
+                      minWidth:win ? 116 : undefined,
+                      background:win ? "rgba(0,195,255,0.18)" : scanned ? "rgba(10,22,42,0.42)" : "rgba(10,22,42,0.92)",
+                      border:`1px solid ${win ? BLUE_BRIGHT : scanned ? "rgba(120,167,232,0.16)" : BLUE_BORDER}`,
+                      borderRadius:8,
+                      padding:win ? "8px 10px" : "6px 10px",
+                      color:win ? BLUE_BRIGHT : scanned ? "rgba(150,180,220,0.38)" : TEXT2,
+                      fontSize:11,
+                      fontFamily:"monospace",
+                      fontWeight:win ? 900 : 700,
+                      textDecoration:scanned ? "line-through" : "none",
+                      textDecorationThickness:scanned ? 2 : undefined,
+                      textDecorationColor:scanned ? "rgba(39,216,255,0.50)" : undefined,
+                      boxShadow:win ? `0 0 22px ${BLUE_BRIGHT}66` : scanned ? "inset 0 0 0 1px rgba(255,255,255,0.02)" : "none",
+                      textAlign:"center",
+                      opacity:scanned ? 0.62 : 1,
+                      transition:"all 0.2s"
+                    }}>
+                      {win ? <><div style={{ fontSize:10, textTransform:"uppercase", letterSpacing:1, color:GREEN }}>Winner</div><div>Voucher $100</div><div style={{ opacity:.75 }}>#{t.id}</div></> : scanned ? <><span style={{ color:"rgba(39,216,255,0.65)", textDecoration:"none", marginRight:4 }}>×</span>#{t.id}</> : <>#{t.id}</>}
                     </div>
                   );
                 })}
@@ -2192,7 +2209,7 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
         </div>
 
         <div style={{ marginTop:18, background:"rgba(5,14,28,0.90)", border:`1px solid ${BLUE_BORDER}`, borderRadius:12, padding:"12px 16px", color:TEXT3, fontSize:12 }}>
-          Demo mode — Gold Bonus runs slower for presentation, player tiles reset cleanly at the start of every draw, only the winning player tile flips, and the member is forced to win one voucher so the tile-card behaviour is visible. Production would process all voucher wins server-side and push live events to each member browser.
+          Demo mode — Gold Bonus runs slower for presentation, player tiles reset cleanly at the start of every draw, non-winning player tiles are crossed off as they are scanned, the winning tile flips, and the member is forced to win one voucher so the tile-card behaviour is visible. Production would process all voucher wins server-side and push live events to each member browser.
         </div>
       </div>
     </div>

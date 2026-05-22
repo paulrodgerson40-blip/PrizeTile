@@ -546,12 +546,12 @@ function TierCards({ onNav }) {
                   <TileRow tier={tier} label="◇ Monthly Bonus Draw"    count={tier.bonusTiles} />
                 )}
 
-                {!tier.bonusAccess && key==="entry" && (
+                {!tier.bonusAccess && key==="bronze" && (
                   <div style={{ marginTop:8, background:BLUE_DIM, border:`1px solid ${BLUE_BORDER}`, borderRadius:8, padding:"8px 12px" }}>
                     <div style={{ fontSize:11, color:GOLD, fontWeight:700 }}>◇ Upgrade to Gold for the exclusive $1,000,000 Gold Bonus Draw</div>
                   </div>
                 )}
-                {!tier.bonusAccess && key==="premium" && (
+                {!tier.bonusAccess && key==="silver" && (
                   <div style={{ marginTop:8, background:BLUE_DIM, border:`1px solid ${BLUE_BORDER}`, borderRadius:8, padding:"8px 12px" }}>
                     <div style={{ fontSize:11, color:GOLD, fontWeight:700 }}>◇ Upgrade to Gold for the exclusive $1,000,000 Gold Bonus Draw</div>
                   </div>
@@ -1860,8 +1860,28 @@ function getActiveTier(tilesSold) {
   return null;
 }
 
+
+// ─── BONUS DRAW ───────────────────────────────────────────────────────────────
+// Gold members only · 10,000 LMCT+ Partner Vouchers · $1,000,000 in prizes
+// Demo uses 30 vouchers for speed; production draw uses 10,000 vouchers server-side.
+const BONUS_PRIZES = [
+  {
+    name: "LMCT+ Partner Voucher",
+    emoji: "🛒",
+    label: "LMCT+ Partner Voucher",
+    qty: 30,
+    remaining: 30,
+    color: BLUE_BRIGHT,
+    pause: 0,
+    isProduct: true,
+    realQty: 10000,
+    silent: true,
+  },
+];
+
 function BonusDraw({ onNav, profile, onDrawStateChange }) {
-  const tier = TIERS[profile?.tier] || TIERS.gold;
+  const tierKey = TIERS[profile?.tier] ? profile.tier : "gold";
+  const tier = TIERS[tierKey] || TIERS.gold;
 
   // Stable bonus tile IDs — generated once on mount, never change
   const makeBonusTiles = () =>
@@ -1871,7 +1891,7 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
           status: i === 2 ? "win" : i < 8 ? "checked" : "pending",
         }))
       : [];
-  const [myBonusTiles, setMyBonusTiles] = useState(makeBonusTiles);
+  const [myBonusTiles, setMyBonusTiles] = useState(() => makeBonusTiles());
 
   const [prizeState, setPrizeState]   = useState(() => BONUS_PRIZES.map(p => ({ ...p })));
   const [liveViewers, setLiveViewers] = useState(() => 3200 + Math.floor(Math.random()*1800));

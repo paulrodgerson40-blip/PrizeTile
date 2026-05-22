@@ -2294,3 +2294,37 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
     </div>
   );
 }
+
+// ─── ROOT ─────────────────────────────────────────────────────────────────────
+const DEFAULT_PROFILE = { id:"00001", name:"Paul R.", state:"VIC", tier:"gold", avatar:"★" };
+
+export default function App() {
+  const [page, setPage]             = useState("home");
+  const [profile, setProfile]       = useState(DEFAULT_PROFILE);
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [drawActive, setDrawActive] = useState(false);
+  const onNav = (p) => setPage(p);
+  const boardType = page.includes("monthly") ? "monthly" : "weekly";
+
+  return (
+    <div style={{ fontFamily:"Arial, sans-serif", background:NAVY, minHeight:"100vh" }}>
+      <style>{`
+        * { box-sizing:border-box; margin:0; padding:0; }
+        button { font-family:inherit; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+        ::-webkit-scrollbar { width:8px; }
+        ::-webkit-scrollbar-track { background:rgba(255,255,255,0.04); border-radius:4px; }
+        ::-webkit-scrollbar-thumb { background:rgba(0,102,255,0.5); border-radius:4px; }
+        ::-webkit-scrollbar-thumb:hover { background:rgba(0,195,255,0.8); }
+        input:focus { border-color: rgba(43,159,232,0.6) !important; box-shadow: 0 0 0 2px rgba(43,159,232,0.15); }
+      `}</style>
+      {editingProfile && <ProfileEditor profile={profile} onSave={p=>{setProfile(p);setEditingProfile(false);}} onClose={()=>setEditingProfile(false)} />}
+      <NavBar page={page} onNav={onNav} drawActive={drawActive} />
+      {page==="home"    && <Landing onNav={onNav} />}
+      {page==="tiers"   && <TierCards onNav={onNav} />}
+      {(page==="draw"||page==="draw-monthly"||page==="draw-weekly") && <LiveDraw boardType={boardType} onNav={onNav} profile={profile} onEditProfile={()=>setEditingProfile(true)} onDrawStateChange={setDrawActive} />}
+      {page==="members" && <WinnersPage onNav={onNav} />}
+      {page==="bonus"   && <BonusDraw onNav={onNav} profile={profile} onDrawStateChange={setDrawActive} />}
+    </div>
+  );
+}

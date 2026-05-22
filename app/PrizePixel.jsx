@@ -648,7 +648,29 @@ function TileRow({ tier, label, count }) {
 }
 
 // ─── AVATAR OPTIONS ──────────────────────────────────────────────────────────
-const AVATARS = ["▰","★","✦","◆","◆","◆","✦","✦","◆","◇","▲","◆"];
+// Premium demo avatars — kept simple enough for a prototype, but more personality than basic shapes.
+const AVATARS = ["🏁","⚡","💎","👑","🔥","🚀","🏎️","💰","🎯","🛡️","🎮","🕹️","🦾","🔷","✦","★"];
+
+function AvatarBadge({ profile, avatar, tierKey, size = 38 }) {
+  const key = tierKey || profile?.tier || "gold";
+  const tier = TIERS[key] || TIERS.gold;
+  const mark = avatar || profile?.avatar || "🏁";
+  return (
+    <span style={{
+      width: size, height: size, borderRadius: "50%",
+      display: "inline-flex", alignItems: "center", justifyContent: "center",
+      background: `radial-gradient(circle at 32% 24%, ${tier.color}30 0%, rgba(3,8,15,0.98) 62%, rgba(3,8,15,1) 100%)`,
+      border: `1.5px solid ${tier.color}88`,
+      boxShadow: `0 0 ${Math.round(size * 0.65)}px ${tier.color}30, inset 0 0 ${Math.round(size * 0.35)}px rgba(255,255,255,0.06)`,
+      color: tier.color,
+      fontSize: Math.round(size * 0.52),
+      lineHeight: 1,
+      flexShrink: 0,
+    }}>
+      {mark}
+    </span>
+  );
+}
 
 // ─── PROFILE EDITOR ──────────────────────────────────────────────────────────
 function ProfileEditor({ profile, onSave, onClose }) {
@@ -666,10 +688,27 @@ function ProfileEditor({ profile, onSave, onClose }) {
         {/* Avatar picker */}
         <div style={{ marginBottom:24 }}>
           <div style={{ fontSize:11, color:TEXT3, textTransform:"uppercase", letterSpacing:1.5, marginBottom:12 }}>Choose Avatar</div>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(6,1fr)", gap:8 }}>
-            {AVATARS.map(a => (
-              <button key={a} onClick={() => setAvatar(a)} style={{ fontSize:28, background: avatar===a ? BLUE_DIM : NAVY4, border:`2px solid ${avatar===a ? BLUE : "transparent"}`, borderRadius:12, padding:"10px 0", cursor:"pointer", transition:"all 0.15s" }}>{a}</button>
-            ))}
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:10 }}>
+            {AVATARS.map(a => {
+              const t = TIERS[tier] || TIERS.gold;
+              const active = avatar === a;
+              return (
+                <button
+                  key={a}
+                  onClick={() => setAvatar(a)}
+                  title={`Use ${a} avatar`}
+                  style={{
+                    background: active ? `${t.color}14` : "rgba(4,10,22,0.96)",
+                    border: `2px solid ${active ? t.color+"AA" : "rgba(73,217,255,0.14)"}`,
+                    borderRadius:14, padding:"10px 0", cursor:"pointer", transition:"all 0.15s",
+                    boxShadow: active ? `0 0 24px ${t.color}30` : "none",
+                    display:"flex", alignItems:"center", justifyContent:"center",
+                  }}
+                >
+                  <AvatarBadge avatar={a} tierKey={tier} size={42} />
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -921,6 +960,7 @@ function LiveDraw({ boardType, onNav, profile, onEditProfile, onDrawStateChange 
     runningRef.current = false;
     revealedRef.current = 0;
     if (scanRef.current) clearInterval(scanRef.current);
+    if (memberRevealRef.current) clearInterval(memberRevealRef.current);
     setTilesRevealed(0); setDrawState("idle"); setWinFeed([]);
     setCurrentPrize(null); setScanLine(0);
     setGrid(Array.from({ length: GRID_SIZE }, () => ({ state:"pending", prize:null })));
@@ -964,17 +1004,31 @@ function LiveDraw({ boardType, onNav, profile, onEditProfile, onDrawStateChange 
   const runningRef  = useRef(false);
   const revealedRef = useRef(0);
   const scanRef     = useRef(null);
+  const memberRevealRef = useRef(null);
+  const memberRevealTilesRef = useRef([]);
 
   const stopDraw = useCallback(() => {
     runningRef.current = false;
     setDrawState("done"); onDrawStateChange?.(false);
     if (scanRef.current) clearInterval(scanRef.current);
-  }, []);
+    if (memberRevealRef.current) clearInterval(memberRevealRef.current);
+    // When the draw ends, any unresolved player tiles finish as crossed-off.
+    // This keeps the card complete while the reveal order during the draw stays random.
+    setMemberTileHits(h => {
+      const nh = { ...h };
+      for (const t of memberRevealTilesRef.current || []) {
+        if (!nh[t]) nh[t] = { prize: null };
+      }
+      return nh;
+    });
+  }, [onDrawStateChange]);
 
   const resetDraw = useCallback(() => {
     runningRef.current = false;
     revealedRef.current = 0;
     if (scanRef.current) clearInterval(scanRef.current);
+    if (memberRevealRef.current) clearInterval(memberRevealRef.current);
+    memberRevealTilesRef.current = [];
     setTilesRevealed(0); setDrawState("idle"); setWinFeed([]); onDrawStateChange?.(false);
     setPrizeState(prizes.map(p => ({ ...p }))); setCurrentPrize(null);
     setGrid(Array.from({ length: GRID_SIZE }, () => ({ state:"pending", prize:null })));
@@ -1038,6 +1092,27 @@ function LiveDraw({ boardType, onNav, profile, onEditProfile, onDrawStateChange 
 
     const memberWonRef  = { count: 0, categories: new Set() }; // one player prize per draw, one per category
 
+    // Player-card reveal is deliberately randomised for demo. The board scans in
+    // numerical order, but the member's card should feel like a live bingo card,
+    // not left-to-right removal. Only the forced winning tile is held back so it
+    // can flip into the winning state at the actual prize moment.
+    const randomMemberRevealOrder = freshMemberTiles
+      .filter(t => t !== forcedPlayerTile)
+      .sort(() => Math.random() - 0.5);
+    memberRevealTilesRef.current = freshMemberTiles;
+    let memberRevealIdx = 0;
+    if (memberRevealRef.current) clearInterval(memberRevealRef.current);
+    const revealEveryMs = Math.max(520, Math.floor(76000 / Math.max(1, freshMemberTiles.length)));
+    memberRevealRef.current = setInterval(() => {
+      if (!runningRef.current) return;
+      const t = randomMemberRevealOrder[memberRevealIdx++];
+      if (t === undefined) {
+        clearInterval(memberRevealRef.current);
+        return;
+      }
+      setMemberTileHits(h => h[t] ? h : ({ ...h, [t]: { prize: null } }));
+    }, revealEveryMs);
+
     const revealStep = () => {
       if (!runningRef.current) return;
       for (let b = 0; b < BATCH; b++) {
@@ -1063,9 +1138,6 @@ function LiveDraw({ boardType, onNav, profile, onEditProfile, onDrawStateChange 
               memberWonRef.count++;
               memberWonRef.categories.add(category);
               setMemberTileHits(h => ({ ...h, [tileNum]: { prize } }));
-            } else if (isMemberTile) {
-              // Member tile checked but not a prize, or already won one prize this draw.
-              setMemberTileHits(h => ({ ...h, [tileNum]: { prize: null } }));
             }
             triggerWin(prize, isMine);
             setTilesRevealed(revealedRef.current);
@@ -1086,10 +1158,8 @@ function LiveDraw({ boardType, onNav, profile, onEditProfile, onDrawStateChange 
             }
           }
         } else {
-          // Non-prize tile — if it's a member tile, mark it as checked (no prize)
-          if (isMemberTile) {
-            setMemberTileHits(h => ({ ...h, [tileNum]: { prize: null } }));
-          }
+          // Non-prize board tile. Player-card reveal is handled separately in
+          // random order so the bottom card does not clear left-to-right.
           setGrid(g => { const ng=[...g]; ng[gridIdx]={ state:"empty", prize:null }; return ng; });
         }
       }
@@ -1314,7 +1384,7 @@ function LiveDraw({ boardType, onNav, profile, onEditProfile, onDrawStateChange 
           {/* Profile chip */}
           <button onClick={onEditProfile} title="Edit your profile" style={{ display:"flex", alignItems:"center", gap:8, background:NAVY3, border:`1px solid ${tier.color}44`, borderRadius:20, padding:"4px 12px 4px 6px", cursor:"pointer", position:"relative" }}>
             <div style={{ position:"relative" }}>
-              <span style={{ fontSize:22 }}>{profile.avatar||"★"}</span>
+              <AvatarBadge profile={profile} size={30} />
               <span style={{ position:"absolute", bottom:-2, right:-4, fontSize:9, background:BLUE, color:"#fff", borderRadius:6, padding:"1px 4px", fontWeight:700 }}>✎</span>
             </div>
             <div style={{ textAlign:"left" }}>
@@ -1502,7 +1572,7 @@ function LiveDraw({ boardType, onNav, profile, onEditProfile, onDrawStateChange 
             {/* ── MY TILES PANEL (below board) ── */}
             <div style={{ background:NAVY3, border:`1px solid ${tier.color}33`, borderRadius:16, padding:"22px 24px", boxShadow:`0 0 30px ${tier.glow}` }}>
               <div style={{ display:"flex", alignItems:"center", gap:14, marginBottom:20 }}>
-                <span style={{ fontSize:32 }}>{profile.avatar||"★"}</span>
+                <AvatarBadge profile={profile} size={42} />
                 <div style={{ flex:1 }}>
                   <div style={{ fontSize:11, color:tier.color, textTransform:"uppercase", letterSpacing:2, fontWeight:700, fontFamily:"'Arial Black',Arial,sans-serif" }}>{tier.name} Member</div>
                   <div style={{ fontSize:18, fontWeight:900, color:TEXT, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic" }}>{profile.name}</div>
@@ -1520,12 +1590,6 @@ function LiveDraw({ boardType, onNav, profile, onEditProfile, onDrawStateChange 
                     <div style={{ fontSize:24, fontWeight:900, color: myHitCount>0?BLUE_BRIGHT:TEXT3, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic" }}>{myHitCount}</div>
                     <div style={{ fontSize:10, color:TEXT3, textTransform:"uppercase", letterSpacing:1 }}>Revealed</div>
                   </div>
-                  {myWinCount>0 && (
-                    <div style={{ textAlign:"center", background:"rgba(5,14,28,0.94)", border:"1px solid rgba(0,230,118,0.25)", borderRadius:10, padding:"10px 16px" }}>
-                      <div style={{ fontSize:24, fontWeight:900, color:BLUE_BRIGHT, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic" }}>{fmtMoney(myWinTotal)}</div>
-                      <div style={{ fontSize:10, color:TEXT3, textTransform:"uppercase", letterSpacing:1 }}>Won!</div>
-                    </div>
-                  )}
                 </div>
               </div>
 
@@ -2288,7 +2352,7 @@ function BonusDraw({ onNav, profile, onDrawStateChange, mainDrawActive = false }
 
 
 // ─── ROOT ─────────────────────────────────────────────────────────────────────
-const DEFAULT_PROFILE = { id:"00001", name:"Paul R.", state:"VIC", tier:"gold", avatar:"★" };
+const DEFAULT_PROFILE = { id:"00001", name:"Paul R.", state:"VIC", tier:"gold", avatar:"🏁" };
 
 export default function App() {
   const [page, setPage]             = useState("home");

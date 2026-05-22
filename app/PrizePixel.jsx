@@ -1292,8 +1292,12 @@ function LiveDraw({ boardType, onNav, profile, onEditProfile, onDrawStateChange 
       <div style={{ background:"rgba(6,12,24,0.97)", backdropFilter:"blur(12px)", borderBottom:`1px solid ${BORDER}`, padding:"10px 24px", display:"flex", alignItems:"center", gap:12, flexWrap:"wrap" }}>
         <button onClick={()=>onNav("home")} style={{ background:"transparent", border:`1px solid ${BORDER2}`, borderRadius:6, padding:"6px 14px", color:TEXT2, cursor:"pointer", fontSize:13 }}>← Back</button>
         <div style={{ display:"flex", gap:8 }}>
-          <GhostBtn active={boardType==="monthly"} onClick={()=>onNav("draw-monthly")}>◆ Monthly Millionaire</GhostBtn>
-          <button onClick={()=>onNav("bonus")} style={{ background:"rgba(4,14,26,0.94)", border:`1px solid rgba(0,245,160,0.38)`, borderRadius:8, padding:"8px 18px", color:GOLD, fontSize:14, fontWeight:700, cursor:"pointer" }}>★ Gold Bonus Draw</button>
+          <GhostBtn active={true} onClick={()=>onNav("draw-monthly")}>◆ Main Board</GhostBtn>
+          {tier.bonusAccess ? (
+            <button onClick={()=>onNav("bonus")} style={{ background:"rgba(4,14,26,0.94)", border:`1px solid ${BLUE_BORDER}`, borderRadius:8, padding:"8px 18px", color:BLUE_BRIGHT, fontSize:14, fontWeight:800, cursor:"pointer" }}>✦ $1M Gold Bonus Board</button>
+          ) : (
+            <button onClick={()=>onNav("bonus")} style={{ background:"rgba(255,255,255,0.035)", border:"1px solid rgba(255,255,255,0.12)", borderRadius:8, padding:"8px 18px", color:TEXT3, fontSize:14, fontWeight:800, cursor:"pointer" }}>🔒 Bonus Board · Gold Only</button>
+          )}
         </div>
         <div style={{ marginLeft:"auto", display:"flex", gap:10, alignItems:"center" }}>
           <div style={{ display:"flex", alignItems:"center", gap:6, background:"rgba(5,14,28,0.94)", border:"1px solid rgba(73,217,255,0.18)", borderRadius:20, padding:"4px 12px" }}>
@@ -1537,6 +1541,20 @@ function LiveDraw({ boardType, onNav, profile, onEditProfile, onDrawStateChange 
                       </div>
                     </div>
                     <button onClick={()=>onNav("bonus")} style={{ background:BLUE_DIM, border:`1px solid ${BLUE_BORDER}`, borderRadius:8, padding:"6px 14px", color:BLUE_BRIGHT, fontSize:12, fontWeight:700, cursor:"pointer" }}>View →</button>
+                  </div>
+                </div>
+              )}
+              {drawState === "idle" && !tier.bonusAccess && (
+                <div style={{ marginBottom:16 }}>
+                  <div style={{ background:"rgba(255,255,255,0.035)", border:"1px solid rgba(255,255,255,0.12)", borderRadius:10, padding:"10px 16px", display:"flex", justifyContent:"space-between", alignItems:"center", gap:12 }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                      <span style={{ fontSize:16 }}>🔒</span>
+                      <div>
+                        <div style={{ fontSize:12, color:TEXT, fontWeight:800 }}>$1M Gold Bonus Board Locked</div>
+                        <div style={{ fontSize:11, color:TEXT3 }}>Only Gold members get 40 bonus tiles and access to the monthly bonus board.</div>
+                      </div>
+                    </div>
+                    <button onClick={()=>onNav("tiers")} style={{ background:`linear-gradient(135deg, ${BLUE_BRIGHT}, ${BLUE})`, border:"none", borderRadius:8, padding:"7px 14px", color:TEXT, fontSize:12, fontWeight:900, cursor:"pointer", whiteSpace:"nowrap" }}>Upgrade →</button>
                   </div>
                 </div>
               )}
@@ -1886,7 +1904,7 @@ function getActiveTier(tilesSold) {
 // ─── BONUS DRAW ───────────────────────────────────────────────────────────────
 // Stable version: this page is intentionally self-contained so clicking the
 // Gold Bonus Draw button cannot crash the prototype before the draw starts.
-function BonusDraw({ onNav, profile, onDrawStateChange }) {
+function BonusDraw({ onNav, profile, onDrawStateChange, mainDrawActive = false }) {
   const safeTierKey = TIERS?.[profile?.tier] ? profile.tier : "gold";
   const tier = TIERS[safeTierKey] || TIERS.gold;
   const bonusTiles = Number(tier?.bonusTiles || 40);
@@ -1914,6 +1932,7 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
   const [liveViewers, setLiveViewers] = useState(() => 4200 + Math.floor(Math.random() * 1800));
   const [boardNum, setBoardNum] = useState(() => 48 + Math.floor(Math.random() * 5));
   const [sparkTiles, setSparkTiles] = useState(() => new Set());
+  const [waitSecs, setWaitSecs] = useState(120);
   const bonusIntervalRef = useRef(null);
 
   const clearBonusTimer = useCallback(() => {
@@ -1929,6 +1948,12 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
     }, 2500);
     return () => clearInterval(iv);
   }, []);
+
+  useEffect(() => {
+    if (!mainDrawActive) { setWaitSecs(120); return; }
+    const iv = setInterval(() => setWaitSecs(v => Math.max(0, v - 1)), 1000);
+    return () => clearInterval(iv);
+  }, [mainDrawActive]);
 
   useEffect(() => {
     clearBonusTimer();
@@ -2069,25 +2094,68 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
 
   if (!hasAccess) {
     return (
-      <div style={{ minHeight:"100vh", color:TEXT, display:"flex", alignItems:"center", justifyContent:"center", padding:32 }}>
-        <div style={{ maxWidth:540, background:"rgba(5,14,28,0.96)", border:`1px solid ${BLUE_BORDER}`, borderRadius:22, padding:42, textAlign:"center", boxShadow:"0 28px 90px rgba(0,0,0,0.55)" }}>
-          <div style={{ fontSize:13, color:BLUE_BRIGHT, fontWeight:900, letterSpacing:3, textTransform:"uppercase", marginBottom:14 }}>Gold Bonus Draw</div>
-          <div style={{ fontSize:34, color:TEXT, fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", marginBottom:14 }}>Gold Members Only</div>
-          <div style={{ color:TEXT2, lineHeight:1.7, marginBottom:28 }}>This board is exclusive to Gold members. Upgrade to Gold to unlock 40 bonus tiles and compete in the monthly $1,000,000 voucher pool.</div>
-          <BlueBtn onClick={() => onNav("tiers")}>VIEW GOLD TIER →</BlueBtn>
+      <div style={{ minHeight:"100vh", color:TEXT }}>
+        <div style={{ background:"rgba(3,8,15,0.96)", backdropFilter:"blur(16px)", borderBottom:`1px solid ${BLUE_BORDER}`, padding:"12px 24px", display:"flex", alignItems:"center", gap:12, flexWrap:"wrap" }}>
+          <button onClick={() => onNav("draw")} style={{ background:"rgba(7,18,34,0.92)", border:`1px solid ${BLUE_BORDER}`, borderRadius:8, padding:"9px 16px", color:TEXT2, cursor:"pointer", fontSize:13 }}>← Back to Main Board</button>
+          <button onClick={() => onNav("draw")} style={{ background:"rgba(0,195,255,0.10)", border:`1px solid ${BLUE_BORDER}`, borderRadius:24, padding:"8px 18px", color:BLUE_BRIGHT, fontSize:13, fontWeight:900, cursor:"pointer", textTransform:"uppercase", letterSpacing:1.2 }}>Main Board</button>
+          <button style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.12)", borderRadius:24, padding:"8px 18px", color:TEXT3, fontSize:13, fontWeight:900, textTransform:"uppercase", letterSpacing:1.2 }}>🔒 Bonus Board</button>
+        </div>
+        <div style={{ minHeight:"calc(100vh - 72px)", display:"flex", alignItems:"center", justifyContent:"center", padding:32 }}>
+          <div style={{ maxWidth:620, background:"rgba(5,14,28,0.96)", border:`1px solid ${BLUE_BORDER}`, borderRadius:24, padding:46, textAlign:"center", boxShadow:"0 28px 90px rgba(0,0,0,0.55)" }}>
+            <div style={{ fontSize:13, color:BLUE_BRIGHT, fontWeight:900, letterSpacing:3, textTransform:"uppercase", marginBottom:14 }}>Gold Bonus Board Locked</div>
+            <div style={{ fontSize:38, color:TEXT, fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", marginBottom:14 }}>Available for Gold Members Only</div>
+            <div style={{ color:TEXT2, lineHeight:1.7, margin:"0 auto 28px", maxWidth:500 }}>Upgrade to Gold to unlock the bonus board, receive 40 extra bonus tiles, and compete for the monthly $1,000,000 Gold Bonus voucher pool after the main draw.</div>
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:12, marginBottom:28 }} className="pt-responsive-grid">
+              {[{l:"Bonus tiles",v:"40"},{l:"Prize pool",v:"$1,000,000"},{l:"Monthly winners",v:"10,000"}].map(x => (
+                <div key={x.l} style={{ background:"rgba(10,22,42,0.80)", border:`1px solid ${BLUE_BORDER}`, borderRadius:14, padding:"14px 10px" }}>
+                  <div style={{ color:BLUE_BRIGHT, fontSize:22, fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic" }}>{x.v}</div>
+                  <div style={{ color:TEXT3, fontSize:10, textTransform:"uppercase", letterSpacing:1.2 }}>{x.l}</div>
+                </div>
+              ))}
+            </div>
+            <BlueBtn onClick={() => onNav("tiers")}>UPGRADE TO GOLD TODAY →</BlueBtn>
+          </div>
         </div>
       </div>
     );
   }
 
+  if (mainDrawActive) {
+    const mm = String(Math.floor(waitSecs / 60)).padStart(2,"0");
+    const ss = String(waitSecs % 60).padStart(2,"0");
+    return (
+      <div style={{ minHeight:"100vh", color:TEXT }}>
+        <div style={{ background:"rgba(3,8,15,0.96)", backdropFilter:"blur(16px)", borderBottom:`1px solid ${BLUE_BORDER}`, padding:"12px 24px", display:"flex", alignItems:"center", gap:12, flexWrap:"wrap" }}>
+          <button onClick={() => onNav("draw")} style={{ background:"rgba(7,18,34,0.92)", border:`1px solid ${BLUE_BORDER}`, borderRadius:8, padding:"9px 16px", color:TEXT2, cursor:"pointer", fontSize:13 }}>← Main Board</button>
+          <button onClick={() => onNav("draw")} style={{ background:"rgba(0,195,255,0.10)", border:`1px solid ${BLUE_BORDER}`, borderRadius:24, padding:"8px 18px", color:BLUE_BRIGHT, fontSize:13, fontWeight:900, cursor:"pointer", textTransform:"uppercase", letterSpacing:1.2 }}>Main Board Running</button>
+          <button style={{ background:"rgba(39,216,255,0.06)", border:`1px solid ${BLUE_BORDER}`, borderRadius:24, padding:"8px 18px", color:TEXT, fontSize:13, fontWeight:900, textTransform:"uppercase", letterSpacing:1.2 }}>$1M Gold Bonus Board</button>
+        </div>
+        <div style={{ minHeight:"calc(100vh - 72px)", display:"flex", alignItems:"center", justifyContent:"center", padding:32 }}>
+          <div style={{ maxWidth:720, background:"rgba(5,14,28,0.96)", border:`1px solid ${BLUE_BORDER}`, borderRadius:24, padding:46, textAlign:"center", boxShadow:"0 28px 90px rgba(0,0,0,0.55)" }}>
+            <div style={{ fontSize:13, color:BLUE_BRIGHT, fontWeight:900, letterSpacing:3, textTransform:"uppercase", marginBottom:14 }}>Gold Bonus Board Queued</div>
+            <div style={{ fontSize:36, color:TEXT, fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", marginBottom:12 }}>Starts After The Main Board</div>
+            <div style={{ color:TEXT2, lineHeight:1.7, margin:"0 auto 26px", maxWidth:560 }}>Gold members can switch to the bonus board now, but the exclusive bonus draw does not open until the Monthly Millionaire board is complete.</div>
+            <div style={{ display:"inline-flex", alignItems:"center", gap:12, background:"rgba(0,195,255,0.10)", border:`1px solid ${BLUE_BORDER}`, borderRadius:18, padding:"18px 34px", marginBottom:28 }}>
+              <span style={{ color:TEXT3, fontSize:12, textTransform:"uppercase", letterSpacing:2 }}>Demo unlock in</span>
+              <span style={{ color:BLUE_BRIGHT, fontSize:36, fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif" }}>{mm}:{ss}</span>
+            </div>
+            <div><BlueBtn onClick={() => onNav("draw")} outline>RETURN TO MAIN BOARD</BlueBtn></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+
   return (
     <div style={{ minHeight:"100vh", color:TEXT }}>
       <div style={{ background:"rgba(3,8,15,0.96)", backdropFilter:"blur(16px)", borderBottom:`1px solid ${BLUE_BORDER}`, padding:"12px 24px", display:"flex", alignItems:"center", gap:12, flexWrap:"wrap" }}>
         <button onClick={() => onNav("draw")} style={{ background:"rgba(7,18,34,0.92)", border:`1px solid ${BORDER2}`, borderRadius:8, padding:"8px 14px", color:TEXT2, cursor:"pointer", fontSize:13 }}>← Main Draw</button>
-        <div style={{ display:"flex", alignItems:"center", gap:9, background:"rgba(0,195,255,0.08)", border:`1px solid ${BLUE_BORDER}`, borderRadius:22, padding:"7px 16px" }}>
+        <button onClick={() => onNav("draw")} style={{ background:"rgba(5,14,28,0.94)", border:`1px solid ${BLUE_BORDER}`, borderRadius:24, padding:"8px 18px", color:TEXT2, fontSize:13, fontWeight:900, cursor:"pointer", textTransform:"uppercase", letterSpacing:1.2 }}>Main Board</button>
+        <button style={{ display:"flex", alignItems:"center", gap:9, background:"rgba(0,195,255,0.10)", border:`1px solid ${BLUE_BORDER}`, borderRadius:24, padding:"8px 18px", color:BLUE_BRIGHT, fontSize:13, fontWeight:900, textTransform:"uppercase", letterSpacing:1.5 }}>
           <span style={{ color:BLUE_BRIGHT }}>✦</span>
-          <span style={{ fontSize:13, color:BLUE_BRIGHT, fontWeight:900, textTransform:"uppercase", letterSpacing:1.8 }}>$1M Gold Bonus Draw</span>
-        </div>
+          $1M Gold Bonus Draw
+        </button>
         <div style={{ marginLeft:"auto", display:"flex", gap:10, alignItems:"center", flexWrap:"wrap" }}>
           <div style={{ background:"rgba(0,195,255,0.08)", border:`1px solid ${BLUE_BORDER}`, borderRadius:20, padding:"5px 12px", fontSize:12, color:BLUE_BRIGHT, fontWeight:800 }}>● {liveViewers.toLocaleString()} watching</div>
           <div style={{ color:TEXT3, fontSize:11, textTransform:"uppercase", letterSpacing:1.4 }}>Board #{String(boardNum).padStart(3,"0")}</div>
@@ -2096,12 +2164,14 @@ function BonusDraw({ onNav, profile, onDrawStateChange }) {
       </div>
 
       <div style={{ maxWidth:1240, margin:"0 auto", padding:"30px 24px 70px" }}>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:14, marginBottom:22 }} className="pt-responsive-grid">
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(6,1fr)", gap:14, marginBottom:22 }} className="pt-responsive-grid">
           {[
-            { label:"Draw", val:"Gold Bonus Draw" },
+            { label:"Board", val:"Gold Bonus" },
             { label:"Prize Pool", val:"$1,000,000" },
             { label:"Vouchers", val:"10,000 × $100" },
             { label:"Your Tiles", val:`${bonusTiles} tiles` },
+            { label:"Tiles Revealed", val:`${revealedCount} / ${bonusTiles}` },
+            { label:"Tiles Remaining", val:`${Math.max(0, bonusTiles - revealedCount)}` },
           ].map(s => (
             <div key={s.label} style={{ background:"rgba(5,14,28,0.96)", border:`1px solid ${BLUE_BORDER}`, borderRadius:14, padding:"16px 18px", boxShadow:"0 18px 55px rgba(0,0,0,0.35)" }}>
               <div style={{ fontSize:10, color:TEXT3, textTransform:"uppercase", letterSpacing:1.4, marginBottom:7 }}>{s.label}</div>
@@ -2225,6 +2295,8 @@ export default function App() {
   const [profile, setProfile]       = useState(DEFAULT_PROFILE);
   const [editingProfile, setEditingProfile] = useState(false);
   const [drawActive, setDrawActive] = useState(false);
+  const [mainDrawActive, setMainDrawActive] = useState(false);
+  const handleMainDrawActive = (active) => { setDrawActive(active); setMainDrawActive(active); };
   const onNav = (p) => setPage(p);
   const boardType = page.includes("monthly") ? "monthly" : "weekly";
 
@@ -2278,9 +2350,9 @@ export default function App() {
       <NavBar page={page} onNav={onNav} drawActive={drawActive} />
       {page==="home"    && <Landing onNav={onNav} />}
       {page==="tiers"   && <TierCards onNav={onNav} />}
-      {(page==="draw"||page==="draw-monthly"||page==="draw-weekly") && <LiveDraw boardType={boardType} onNav={onNav} profile={profile} onEditProfile={()=>setEditingProfile(true)} onDrawStateChange={setDrawActive} />}
+      {(page==="draw"||page==="draw-monthly"||page==="draw-weekly") && <LiveDraw boardType={boardType} onNav={onNav} profile={profile} onEditProfile={()=>setEditingProfile(true)} onDrawStateChange={handleMainDrawActive} />}
       {page==="members" && <WinnersPage onNav={onNav} />}
-      {page==="bonus"   && <BonusDraw onNav={onNav} profile={profile} onDrawStateChange={setDrawActive} />}
+      {page==="bonus"   && <BonusDraw onNav={onNav} profile={profile} onDrawStateChange={setDrawActive} mainDrawActive={mainDrawActive} />}
       </div>
     </div>
   );

@@ -185,7 +185,6 @@ function NavBar({ page, onNav, drawActive }) {
     { id: "tiers",   label: "Tiers" },
     { id: "draw",    label: "Live Draw" },
     { id: "members", label: "Winners" },
-    { id: "admin",   label: "⚙ Admin" },
   ];
   return (
     <div style={{ background: "rgba(10,15,30,0.95)", backdropFilter: "blur(12px)", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", padding: "0 28px", height: 64, position: "sticky", top: 0, zIndex: 200 }}>

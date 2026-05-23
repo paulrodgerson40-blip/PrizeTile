@@ -2351,6 +2351,251 @@ function BonusDraw({ onNav, profile, onDrawStateChange, mainDrawActive = false }
 }
 
 
+// ─── MOBILE DETECTION ────────────────────────────────────────────────────────
+function useIsMobile() {
+  const [mobile, setMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+  return mobile;
+}
+
+// ─── MOBILE NAV ──────────────────────────────────────────────────────────────
+function MobileNav({ page, onNav }) {
+  const links = [
+    { id:"home",    label:"Home",    icon:"⬡" },
+    { id:"tiers",   label:"Tiers",   icon:"◈" },
+    { id:"members", label:"Winners", icon:"★" },
+  ];
+  return (
+    <div style={{ position:"sticky", top:0, zIndex:200, background:"rgba(2,6,13,0.97)", backdropFilter:"blur(20px)", borderBottom:`1px solid rgba(98,168,255,0.20)` }}>
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 16px", height:58 }}>
+        <button onClick={() => onNav("home")} style={{ background:"none", border:"none", cursor:"pointer", padding:0, lineHeight:0 }}>
+          <LmctLogo height={30} />
+        </button>
+        <div style={{ display:"flex", gap:4 }}>
+          {links.map(l => {
+            const active = page === l.id;
+            return (
+              <button key={l.id} onClick={() => onNav(l.id)} style={{
+                background: active ? `rgba(18,107,255,0.18)` : "transparent",
+                border: active ? `1px solid rgba(39,216,255,0.35)` : "1px solid transparent",
+                borderRadius:8, padding:"6px 14px", cursor:"pointer",
+                color: active ? BLUE_BRIGHT : "rgba(220,235,255,0.65)",
+                fontSize:13, fontWeight: active ? 900 : 600,
+              }}>{l.label}</button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── MOBILE HOME ─────────────────────────────────────────────────────────────
+function MobileLanding({ onNav }) {
+  const { satMillionnaire } = getNextDrawInfo();
+  const { satMillionaire } = getNextDrawInfo();
+  const cd = useCountdown(satMillionaire);
+  const pad = n => String(n??0).padStart(2,"0");
+  const drawDate = satMillionaire.toLocaleDateString("en-AU",{weekday:"long",day:"numeric",month:"long"});
+  return (
+    <div style={{ padding:"28px 16px 60px" }}>
+      {/* Hero */}
+      <div style={{ textAlign:"center", marginBottom:32 }}>
+        <div style={{ display:"inline-flex", alignItems:"center", gap:8, background:"rgba(18,107,255,0.12)", border:`1px solid rgba(39,216,255,0.25)`, borderRadius:20, padding:"5px 14px", marginBottom:18 }}>
+          <span style={{ width:6, height:6, borderRadius:"50%", background:BLUE_BRIGHT, display:"inline-block" }} />
+          <span style={{ fontSize:11, color:BLUE_BRIGHT, fontWeight:700, letterSpacing:2, textTransform:"uppercase" }}>Member Reward Engine</span>
+        </div>
+        <div style={{ fontSize:32, fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", textTransform:"uppercase", color:TEXT, lineHeight:1.05, letterSpacing:-1, marginBottom:10 }}>
+          AUSTRALIA'S FIRST
+        </div>
+        <div style={{ display:"inline-block", background:BLUE_BRIGHT, borderRadius:5, padding:"5px 18px", marginBottom:10 }}>
+          <span style={{ fontSize:28, fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", textTransform:"uppercase", color:NAVY, letterSpacing:-0.5 }}>✦ LIVE PRIZE BOARD</span>
+        </div>
+        <div style={{ fontSize:22, fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", textTransform:"uppercase", color:TEXT, lineHeight:1.1, letterSpacing:-0.5 }}>
+          & MEMBER DRAW ENGINE
+        </div>
+        <p style={{ color:"rgba(220,235,255,0.65)", fontSize:14, lineHeight:1.6, margin:"16px auto 24px", maxWidth:320 }}>
+          Every month on a Saturday we give away <strong style={{ color:BLUE_BRIGHT }}>$5,000,000 in prizes</strong> — including <strong style={{ color:GOLD }}>$1,000,000 cash</strong>, 50 brand new cars and 100 holidays.
+        </p>
+        <div style={{ display:"flex", gap:10, justifyContent:"center", flexWrap:"wrap" }}>
+          <button onClick={() => onNav("tiers")} style={{ background:`linear-gradient(135deg,${BLUE},#0035BB)`, border:"none", borderRadius:10, padding:"13px 28px", fontSize:14, fontWeight:900, color:TEXT, cursor:"pointer", fontFamily:"'Arial Black',Arial,sans-serif", letterSpacing:1, textTransform:"uppercase" }}>
+            VIEW TIERS
+          </button>
+          <button onClick={() => onNav("members")} style={{ background:"transparent", border:`1px solid rgba(39,216,255,0.45)`, borderRadius:10, padding:"13px 24px", fontSize:14, fontWeight:700, color:BLUE_BRIGHT, cursor:"pointer" }}>
+            WINNERS
+          </button>
+        </div>
+      </div>
+
+      {/* Countdown */}
+      <div style={{ background:"rgba(4,9,20,0.90)", border:`1px solid rgba(39,216,255,0.30)`, borderRadius:18, padding:"28px 20px", textAlign:"center", marginBottom:24, boxShadow:"0 0 60px rgba(18,107,255,0.15)" }}>
+        <div style={{ fontSize:11, color:BLUE_BRIGHT, textTransform:"uppercase", letterSpacing:4, fontWeight:700, marginBottom:14, display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
+          <span style={{ color:GOLD }}>✦</span><span>NEXT DRAW</span><span style={{ color:GOLD }}>✦</span>
+        </div>
+        <div style={{ fontSize:52, fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", color:TEXT, lineHeight:1, marginBottom:4, textShadow:"0 0 30px rgba(255,255,255,0.2)" }}>
+          $6,000,000
+        </div>
+        <div style={{ fontSize:14, color:GOLD, fontWeight:700, marginBottom:24, fontStyle:"italic" }}>in prizes — every month</div>
+        <div style={{ display:"flex", gap:8, justifyContent:"center", alignItems:"center", marginBottom:20 }}>
+          {[{v:cd.d,l:"Days"},{v:cd.h,l:"Hrs"},{v:cd.m,l:"Mins"},{v:cd.s,l:"Secs"}].map(({v,l},i)=>(
+            <div key={l} style={{ display:"flex", alignItems:"center", gap:8 }}>
+              <div style={{ textAlign:"center" }}>
+                <div style={{ background:"rgba(10,20,45,0.80)", border:`1px solid ${GOLD}44`, borderRadius:8, padding:"12px 14px", minWidth:56 }}>
+                  <div style={{ fontSize:28, fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif", color:GOLD, lineHeight:1 }}>{pad(v)}</div>
+                </div>
+                <div style={{ fontSize:9, color:"rgba(220,235,255,0.5)", marginTop:5, textTransform:"uppercase", letterSpacing:2, fontWeight:700 }}>{l}</div>
+              </div>
+              {i<3 && <div style={{ fontSize:22, color:`${GOLD}55`, fontWeight:900, marginBottom:18 }}>:</div>}
+            </div>
+          ))}
+        </div>
+        <div style={{ fontSize:12, color:"rgba(220,235,255,0.55)", marginBottom:16 }}>
+          📅 {drawDate} · 8:00 PM AEST
+        </div>
+        <div style={{ display:"flex", gap:6, justifyContent:"center", flexWrap:"wrap" }}>
+          {[
+            {emoji:"💰",label:"$1M Cash",color:GOLD},
+            {emoji:"🏎️",label:"50 Cars",color:BLUE_BRIGHT},
+            {emoji:"✈️",label:"100 Holidays",color:BLUE_BRIGHT},
+            {emoji:"💻",label:"500 Tech",color:STEEL},
+            {emoji:"🛒",label:"10K Vouchers",color:BLUE_BRIGHT},
+          ].map(p=>(
+            <div key={p.label} style={{ display:"flex", alignItems:"center", gap:5, background:`${p.color}14`, border:`1px solid ${p.color}35`, borderRadius:16, padding:"5px 10px" }}>
+              <span style={{ fontSize:13 }}>{p.emoji}</span>
+              <span style={{ fontSize:11, color:p.color, fontWeight:700 }}>{p.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Desktop draw notice */}
+      <div style={{ background:"rgba(18,107,255,0.08)", border:`1px solid rgba(39,216,255,0.20)`, borderRadius:12, padding:"16px 20px", textAlign:"center" }}>
+        <div style={{ fontSize:18, marginBottom:6 }}>🖥️</div>
+        <div style={{ fontSize:13, color:BLUE_BRIGHT, fontWeight:700, marginBottom:4 }}>Live Draw — Desktop Experience</div>
+        <div style={{ fontSize:12, color:"rgba(220,235,255,0.55)", lineHeight:1.5 }}>
+          The live draw board with 8.9 million tiles is built for desktop. Open prizetile.com.au on a laptop or desktop to watch the full draw demo.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── MOBILE TIERS ─────────────────────────────────────────────────────────────
+function MobileTierCards({ onNav }) {
+  return (
+    <div style={{ padding:"24px 16px 60px" }}>
+      <div style={{ marginBottom:28 }}>
+        <div style={{ fontSize:26, fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", textTransform:"uppercase", color:TEXT, letterSpacing:-0.5, marginBottom:6 }}>Membership Tiers</div>
+        <p style={{ color:"rgba(220,235,255,0.55)", fontSize:14 }}>More tiles. More board positions. Every month.</p>
+      </div>
+      {Object.entries(TIERS).map(([key, tier]) => {
+        const isGold = key === "gold";
+        return (
+          <div key={key} style={{
+            background: isGold ? "rgba(10,18,30,0.95)" : "rgba(8,14,26,0.80)",
+            border: isGold ? `1.5px solid ${GOLD}55` : `1px solid rgba(98,168,255,0.15)`,
+            borderRadius:14, padding:"22px 20px", marginBottom:14, position:"relative",
+            boxShadow: isGold ? `0 0 40px rgba(107,232,255,0.08)` : "none",
+          }}>
+            {isGold && (
+              <div style={{ position:"absolute", top:0, right:0, background:`linear-gradient(135deg,${GOLD},rgba(107,232,255,0.8))`, color:NAVY, fontSize:10, fontWeight:900, padding:"5px 16px 5px 24px", clipPath:"polygon(16px 0,100% 0,100% 100%,0 100%)", letterSpacing:1.5, borderRadius:"0 14px 0 0" }}>MOST POPULAR</div>
+            )}
+            <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:14 }}>
+              <div style={{ width:42, height:42, borderRadius:10, background:`${tier.color}22`, border:`1.5px solid ${tier.color}55`, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                <div style={{ width:16, height:16, borderRadius:3, background:tier.color, boxShadow:`0 0 10px ${tier.color}88` }} />
+              </div>
+              <div>
+                <div style={{ fontSize:20, fontWeight:900, color:TEXT, fontFamily:"'Arial Black',Arial,sans-serif" }}>{tier.name}</div>
+                <div style={{ fontSize:22, fontWeight:900, color:tier.color }}>${tier.price}<span style={{ fontSize:12, color:"rgba(220,235,255,0.45)", fontWeight:400 }}>/mo</span></div>
+              </div>
+            </div>
+            <div style={{ display:"flex", gap:8, marginBottom:14, flexWrap:"wrap" }}>
+              <div style={{ background:`rgba(98,168,255,0.10)`, border:`1px solid rgba(98,168,255,0.20)`, borderRadius:8, padding:"8px 14px", flex:1, textAlign:"center" }}>
+                <div style={{ fontSize:22, fontWeight:900, color:BLUE_BRIGHT, fontFamily:"'Arial Black',Arial,sans-serif" }}>{tier.monthlyTiles}</div>
+                <div style={{ fontSize:10, color:"rgba(220,235,255,0.45)", textTransform:"uppercase", letterSpacing:1.5, marginTop:2 }}>Tiles/Month</div>
+              </div>
+              {tier.bonusAccess && (
+                <div style={{ background:`rgba(107,232,255,0.08)`, border:`1px solid ${GOLD}33`, borderRadius:8, padding:"8px 14px", flex:1, textAlign:"center" }}>
+                  <div style={{ fontSize:22, fontWeight:900, color:GOLD, fontFamily:"'Arial Black',Arial,sans-serif" }}>{tier.bonusTiles}</div>
+                  <div style={{ fontSize:10, color:"rgba(220,235,255,0.45)", textTransform:"uppercase", letterSpacing:1.5, marginTop:2 }}>Bonus Tiles</div>
+                </div>
+              )}
+            </div>
+            {tier.bonusAccess && (
+              <div style={{ background:`rgba(107,232,255,0.06)`, border:`1px solid ${GOLD}25`, borderRadius:8, padding:"10px 14px", marginBottom:14, display:"flex", alignItems:"center", gap:8 }}>
+                <span style={{ fontSize:16 }}>★</span>
+                <div>
+                  <div style={{ fontSize:12, color:GOLD, fontWeight:700 }}>Gold Bonus Draw</div>
+                  <div style={{ fontSize:11, color:"rgba(220,235,255,0.50)" }}>Exclusive monthly voucher draw — Gold members only</div>
+                </div>
+              </div>
+            )}
+            <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:14 }}>
+              <span style={{ fontSize:13 }}>💳</span>
+              <span style={{ fontSize:12, color:"rgba(220,235,255,0.50)" }}>Cash · Card · Crypto accepted</span>
+            </div>
+            <button style={{ width:"100%", background: isGold ? `linear-gradient(135deg,${GOLD},rgba(107,232,255,0.8))` : `linear-gradient(135deg,${BLUE},#0035BB)`, border:"none", borderRadius:9, padding:"13px", fontSize:14, fontWeight:900, color: isGold ? NAVY : TEXT, cursor:"pointer", fontFamily:"'Arial Black',Arial,sans-serif", letterSpacing:1 }}>
+              {isGold ? "JOIN GOLD — $109.99/mo" : `JOIN ${tier.name.toUpperCase()} — $${tier.price}/mo`}
+            </button>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── MOBILE WINNERS ───────────────────────────────────────────────────────────
+function MobileWinnersPage() {
+  const winners = MILLIONAIRE_RECENT;
+  return (
+    <div style={{ padding:"24px 16px 60px" }}>
+      <div style={{ marginBottom:28 }}>
+        <div style={{ fontSize:26, fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", textTransform:"uppercase", color:TEXT, letterSpacing:-0.5, marginBottom:6 }}>Winners</div>
+        <p style={{ color:"rgba(220,235,255,0.55)", fontSize:14 }}>Real members. Real prizes. Every month.</p>
+      </div>
+      {/* Last draw summary */}
+      <div style={{ background:"rgba(4,9,20,0.90)", border:`1px solid rgba(39,216,255,0.25)`, borderRadius:14, padding:"20px 18px", marginBottom:20, textAlign:"center" }}>
+        <div style={{ fontSize:11, color:BLUE_BRIGHT, textTransform:"uppercase", letterSpacing:3, fontWeight:700, marginBottom:10 }}>Last Monthly Draw</div>
+        <div style={{ display:"flex", gap:8, justifyContent:"center", flexWrap:"wrap", marginBottom:12 }}>
+          {[["1","$1M Cash",GOLD],["50","Cars",BLUE_BRIGHT],["100","Holidays",BLUE_BRIGHT],["500","Tech",STEEL],["10,000","Vouchers",BLUE_BRIGHT]].map(([n,l,c])=>(
+            <div key={l} style={{ background:`${c}12`, border:`1px solid ${c}30`, borderRadius:8, padding:"8px 12px", textAlign:"center", minWidth:70 }}>
+              <div style={{ fontSize:18, fontWeight:900, color:c, fontFamily:"'Arial Black',Arial,sans-serif" }}>{n}</div>
+              <div style={{ fontSize:10, color:"rgba(220,235,255,0.45)", textTransform:"uppercase", letterSpacing:1 }}>{l}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{ fontSize:12, color:"rgba(220,235,255,0.40)" }}>Saturday 31 May · 8:00 PM AEST</div>
+      </div>
+      {/* Millionaire list */}
+      <div style={{ fontSize:13, color:BLUE_BRIGHT, fontWeight:700, textTransform:"uppercase", letterSpacing:2, marginBottom:12 }}>Hall of Fame — $1M Cash Winners</div>
+      {winners.slice(0,6).map((w,i)=>(
+        <div key={i} style={{ background:"rgba(8,14,26,0.80)", border:`1px solid rgba(98,168,255,0.12)`, borderRadius:10, padding:"14px 16px", marginBottom:10, display:"flex", alignItems:"center", gap:14 }}>
+          <div style={{ width:38, height:38, borderRadius:10, background:`rgba(18,107,255,0.15)`, border:`1px solid rgba(39,216,255,0.25)`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:18, flexShrink:0 }}>
+            {w.avatar||w.emoji||"🏆"}
+          </div>
+          <div style={{ flex:1, minWidth:0 }}>
+            <div style={{ fontSize:14, fontWeight:700, color:TEXT, marginBottom:2 }}>{w.name}</div>
+            <div style={{ fontSize:12, color:"rgba(220,235,255,0.45)" }}>{w.state} · {w.date}</div>
+          </div>
+          <div style={{ textAlign:"right", flexShrink:0 }}>
+            <div style={{ fontSize:14, fontWeight:900, color:GOLD }}>$1,000,000</div>
+            <div style={{ fontSize:10, color:"rgba(220,235,255,0.35)" }}>CASH</div>
+          </div>
+        </div>
+      ))}
+      <div style={{ background:"rgba(18,107,255,0.08)", border:`1px solid rgba(39,216,255,0.18)`, borderRadius:10, padding:"14px 16px", textAlign:"center", marginTop:8 }}>
+        <div style={{ fontSize:13, color:BLUE_BRIGHT, fontWeight:700, marginBottom:4 }}>Gold Bonus Draw</div>
+        <div style={{ fontSize:12, color:"rgba(220,235,255,0.50)", lineHeight:1.5 }}>10,000 × $100 Partner Vouchers given to Gold members every month — same Saturday night.</div>
+      </div>
+    </div>
+  );
+}
+
 // ─── ROOT ─────────────────────────────────────────────────────────────────────
 const DEFAULT_PROFILE = { id:"00001", name:"Paul R.", state:"VIC", tier:"gold", avatar:"🏁" };
 
@@ -2363,6 +2608,55 @@ export default function App() {
   const handleMainDrawActive = (active) => { setDrawActive(active); setMainDrawActive(active); };
   const onNav = (p) => setPage(p);
   const boardType = page.includes("monthly") ? "monthly" : "weekly";
+  const isMobile = useIsMobile();
+
+  // ── Shared background + styles ──────────────────────────────────────────────
+  const shellStyle = { fontFamily:"Arial, sans-serif", background:"radial-gradient(circle at 50% -18%, rgba(18,107,255,.10), transparent 34%), linear-gradient(180deg,#02060D 0%, #041020 48%, #02060D 100%)", minHeight:"100vh", position:"relative", overflowX:"hidden" };
+  const globalStyles = `
+    * { box-sizing:border-box; margin:0; padding:0; }
+    button { font-family:inherit; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    @keyframes shimmer { 0%{opacity:0.5} 50%{opacity:1} 100%{opacity:0.5} }
+    @keyframes countFlip { 0%{transform:translateY(-4px);opacity:0} 100%{transform:translateY(0);opacity:1} }
+    ::-webkit-scrollbar { width:6px; }
+    ::-webkit-scrollbar-track { background:rgba(0,0,0,0.3); }
+    ::-webkit-scrollbar-thumb { background:rgba(0,87,255,0.5); border-radius:3px; }
+    ::-webkit-scrollbar-thumb:hover { background:rgba(0,195,255,0.7); }
+    input:focus { border-color:rgba(39,216,255,0.55) !important; box-shadow:0 0 0 2px rgba(39,216,255,0.12); }
+    @media (max-width: 900px) { .pt-responsive-grid { grid-template-columns:1fr !important; } }
+  `;
+
+  // ── Mobile render ───────────────────────────────────────────────────────────
+  if (isMobile) {
+    // Clamp mobile page to valid mobile pages
+    const mobilePage = (page === "draw" || page === "bonus") ? "home" : page;
+    return (
+      <div style={shellStyle}>
+        <style>{globalStyles}</style>
+        {/* Rays background — same as desktop */}
+        <div style={{ position:"fixed", inset:0, pointerEvents:"none", zIndex:0, overflow:"hidden" }}>
+          <svg width="100%" height="100%" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="mr1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#1060FF" stopOpacity="0.45"/><stop offset="100%" stopColor="#0057FF" stopOpacity="0"/></linearGradient>
+              <linearGradient id="mr2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#00C3FF" stopOpacity="0.22"/><stop offset="100%" stopColor="#0057FF" stopOpacity="0"/></linearGradient>
+              <radialGradient id="mg1" cx="80%" cy="0%" r="55%"><stop offset="0%" stopColor="#126BFF" stopOpacity="0.18"/><stop offset="100%" stopColor="#02060D" stopOpacity="0"/></radialGradient>
+            </defs>
+            <rect width="1440" height="900" fill="url(#mg1)"/>
+            <polygon points="1440,0 1440,380 520,900 260,900" fill="url(#mr1)" opacity="0.7"/>
+            <polygon points="1440,0 1440,180 760,900 640,900" fill="url(#mr2)" opacity="0.6"/>
+          </svg>
+        </div>
+        <div style={{ position:"relative", zIndex:1 }}>
+          <MobileNav page={mobilePage} onNav={onNav} />
+          {mobilePage === "home"    && <MobileLanding onNav={onNav} />}
+          {mobilePage === "tiers"   && <MobileTierCards onNav={onNav} />}
+          {mobilePage === "members" && <MobileWinnersPage />}
+        </div>
+      </div>
+    );
+  }
+
+  // ── Desktop render — UNCHANGED ──────────────────────────────────────────────
 
   return (
     <div style={{ fontFamily:"Arial, sans-serif", background:"radial-gradient(circle at 50% -18%, rgba(18,107,255,.10), transparent 34%), linear-gradient(180deg,#02060D 0%, #041020 48%, #02060D 100%)", minHeight:"100vh", position:"relative", overflowX:"hidden" }}>

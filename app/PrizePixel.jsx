@@ -399,7 +399,7 @@ function Landing({ onNav }) {
             </div>
           </div>
           <p style={{ fontSize: 16, color: TEXT2, maxWidth: 590, margin: "24px auto 30px", lineHeight: 1.62 }}>
-            Before every draw, all member tiles are <strong style={{ color: TEXT }}>randomly placed on the board</strong>. The board reveals live. Every month on a Saturday we give away <strong style={{ color: BLUE_BRIGHT }}>$5,000,000 in prizes</strong> — including <strong style={{ color: BLUE_BRIGHT }}>$1,000,000 cash</strong>, 50 brand new cars and 100 holidays. Gold members compete in an exclusive <strong style={{ color: BLUE_BRIGHT }}>$1,000,000 bonus draw</strong> the same night.
+            Before every draw, all member tiles are <strong style={{ color: TEXT }}>randomly placed on the board</strong>. The board reveals live. Every month on a Saturday the member board allocates <strong style={{ color: BLUE_BRIGHT }}>$5,000,000 in prizes</strong> — including <strong style={{ color: BLUE_BRIGHT }}>$1,000,000 cash</strong>, 50 brand new cars and 100 holidays. Gold members receive automatic access to an automatic access to the <strong style={{ color: BLUE_BRIGHT }}>$1,000,000 Gold member reward board</strong> the same night.
           </p>
           <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap", marginBottom:42 }}>
             <BlueBtn onClick={() => onNav("draw")}>▶ WATCH LIVE DRAW</BlueBtn>
@@ -412,8 +412,8 @@ function Landing({ onNav }) {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 74 }}>
           {[
             { val: "$5,000,000",  label: "In prizes one Saturday night every month", sub: "Top prize: $1,000,000 cash",              accent: BLUE_BRIGHT },
-            { val: "50 Cars",     label: "Given away in a single night — every month", sub: "Plus 100 holidays · 10,000 vouchers",   accent: "#FFFFFF" },
-            { val: "$1,000,000",  label: "Gold exclusive bonus draw — same night",   sub: "Gold members only · 10,000 vouchers", accent: GREEN },
+            { val: "50 Cars",     label: "Allocated in a single night — every month", sub: "Plus 100 holidays · 10,000 vouchers",   accent: "#FFFFFF" },
+            { val: "$1,000,000",  label: "Gold member reward board — same night",   sub: "Gold members only · 10,000 vouchers", accent: GREEN },
           ].map(s => (
             <div key={s.label} style={{ background: "rgba(5,12,26,0.95)", border: `1px solid rgba(98,168,255,0.20)`, borderRadius: 18, padding: "26px 24px", textAlign: "center", backdropFilter:"blur(18px)", boxShadow:"inset 0 0 35px rgba(39,216,255,.04), 0 18px 55px rgba(0,0,0,.32)" }}>
               <div style={{ fontSize: "clamp(28px,4vw,44px)", fontWeight: 900, color: s.accent, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic", lineHeight: 1, marginBottom: 8, textShadow:`0 0 18px ${s.accent}44` }}>{s.val}</div>
@@ -426,13 +426,13 @@ function Landing({ onNav }) {
         <div style={{ borderTop: `1px solid ${BORDER}`, paddingTop: 56, marginBottom: 60 }}>
           <SectionHead>How Many Tiles Do You Get?</SectionHead>
           <p style={{ color: TEXT2, marginBottom: 34, marginLeft: 14, fontSize: 16, maxWidth: 650 }}>
-            Your membership tier decides how many tiles you get each draw. Before every draw, all tiles from all members are <strong style={{ color: TEXT }}>randomly placed on the board</strong>. More tiles means more positions and more chances to hit.
+            Your membership tier decides how many tiles you get each draw. Before every draw, all tiles from all members are <strong style={{ color: TEXT }}>randomly placed on the board</strong>. More tiles means more allocated positions when the member board is generated.
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 24 }}>
             {[
-              { tier: "Bronze", price: "$29.99/mo", tiles: 10, color: "#78A7E8", tagline: "Get started" },
-              { tier: "Silver", price: "$59.99/mo", tiles: 40, color: "#DCEBFF", tagline: "4× more chances every draw" },
-              { tier: "Gold",   price: "$109.99/mo",tiles: 100, color: BLUE_BRIGHT, tagline: "10× tiles + exclusive $1M Bonus Draw" },
+              { tier: "Bronze", price: "$29.99/mo", tiles: 10, color: "#78A7E8", tagline: "Included member access" },
+              { tier: "Silver", price: "$59.99/mo", tiles: 40, color: "#DCEBFF", tagline: "4× more board positions every month" },
+              { tier: "Gold",   price: "$109.99/mo",tiles: 100, color: BLUE_BRIGHT, tagline: "10× tiles + Gold member reward board" },
             ].map(t => (
               <div key={t.tier} style={{ background: "rgba(5,12,26,0.95)", border: `1.5px solid ${t.color}44`, borderRadius: 18, padding: "30px 24px", textAlign: "center", boxShadow: `0 0 34px ${t.color}18`, backdropFilter:"blur(18px)" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 16 }}>
@@ -453,7 +453,7 @@ function Landing({ onNav }) {
         <div style={{ borderTop: `1px solid ${BORDER}`, paddingTop: 56, marginBottom: 60 }}>
           <SectionHead>One Night. One Million. Every Month.</SectionHead>
           <p style={{ color: TEXT2, marginBottom: 34, marginLeft: 14, fontSize: 16 }}>
-            Every month on a Saturday night, LMCT+ gives away <strong style={{ color: BLUE_BRIGHT }}>$5,000,000 in prizes</strong>. Gold members also compete in an exclusive <strong style={{ color: GREEN }}>$1,000,000 bonus draw</strong> the same night.
+            Every month on a Saturday night, the LMCT+ member board allocates <strong style={{ color: BLUE_BRIGHT }}>$5,000,000 in prizes</strong>. Gold members also receive automatic access to an automatic access to the <strong style={{ color: GREEN }}>$1,000,000 Gold member reward board</strong> the same night.
           </p>
           <div style={{ display: "grid", gridTemplateColumns:"1.3fr .9fr", gap: 18 }}>
             <div style={{ background: "rgba(5,12,26,0.95)", border: `1.5px solid ${BLUE_BORDER}`, borderRadius: 18, overflow: "hidden", boxShadow: `0 0 42px rgba(18,107,255,0.16)`, backdropFilter:"blur(18px)" }}>
@@ -463,11 +463,11 @@ function Landing({ onNav }) {
               </div>
               <div style={{ padding: "18px 26px" }}>
                 {[
-                  { emoji: "💵", prize: "$1,000,000 Cash", desc: "1 member becomes a millionaire — every month", color: GREEN },
-                  { emoji: "🏎️", prize: "Brand New Car", desc: "50 winners — brand new car each", color: BLUE_BRIGHT },
-                  { emoji: "✈️", prize: "Holiday Package", desc: "100 winners", color: BLUE_BRIGHT },
-                  { emoji: "💻", prize: "Tech Bundle", desc: "500 winners", color: STEEL },
-                  { emoji: "🎟️", prize: "LMCT+ Partner Voucher", desc: "10,000 winners every month", color: BLUE_SOFT },
+                  { emoji: "💵", prize: "$1,000,000 Cash", desc: "One member receives $1,000,000 every month", color: GREEN },
+                  { emoji: "🏎️", prize: "Brand New Car", desc: "50 members receive a brand new car", color: BLUE_BRIGHT },
+                  { emoji: "✈️", prize: "Holiday Package", desc: "100 holiday packages allocated", color: BLUE_BRIGHT },
+                  { emoji: "💻", prize: "Tech Bundle", desc: "500 tech bundles allocated", color: STEEL },
+                  { emoji: "🎟️", prize: "LMCT+ Partner Voucher", desc: "10,000 members receive value every month", color: BLUE_SOFT },
                 ].map(r => (
                   <div key={r.prize} style={{ display: "flex", alignItems: "center", gap: 14, padding: "11px 0", borderBottom: `1px solid ${BORDER}` }}>
                     <div style={{ fontSize: 20 }}>{r.emoji}</div><div style={{ flex:1 }}><div style={{ fontSize: 15, fontWeight: 900, color: r.color, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic" }}>{r.prize}</div><div style={{ fontSize: 12, color: TEXT3 }}>{r.desc}</div></div>
@@ -478,11 +478,11 @@ function Landing({ onNav }) {
             <div style={{ background: "rgba(5,12,26,0.95)", border: `1.5px solid ${GREEN_BORDER}`, borderRadius: 18, overflow: "hidden", boxShadow: "0 0 42px rgba(0,245,160,0.12)", backdropFilter:"blur(18px)" }}>
               <div style={{ background: "linear-gradient(90deg, rgba(0,245,160,0.18), rgba(39,216,255,0.08))", borderBottom: `1px solid ${GREEN_BORDER}`, padding: "18px 24px" }}>
                 <div style={{ fontSize: 11, color: GREEN, textTransform: "uppercase", letterSpacing: 2.3, fontWeight: 900, marginBottom: 5 }}>Gold Members Only</div>
-                <div style={{ fontSize: 23, fontWeight: 900, color: TEXT, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic" }}>$1,000,000 Bonus Draw</div>
+                <div style={{ fontSize: 23, fontWeight: 900, color: TEXT, fontFamily: "'Arial Black',Arial,sans-serif", fontStyle: "italic" }}>$1,000,000 Gold Member Board</div>
               </div>
               <div style={{ padding:"24px" }}>
                 <div style={{ fontSize:46, color:GREEN, fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", textShadow:"0 0 28px rgba(0,245,160,.32)" }}>$1M</div>
-                <div style={{ color:TEXT2, lineHeight:1.6, fontSize:14, marginTop:8 }}>10,000 partner voucher winners every month. Included with Gold. No extra ticket purchase.</div>
+                <div style={{ color:TEXT2, lineHeight:1.6, fontSize:14, marginTop:8 }}>10,000 partner voucher winners every month. Included with Gold. Automatically included with Gold membership.</div>
               </div>
             </div>
           </div>
@@ -517,7 +517,7 @@ function TierCards({ onNav }) {
       <div style={{ maxWidth: 960, margin: "0 auto" }}>
         <div style={{ marginBottom: 56 }}>
           <SectionHead>Membership Tiers</SectionHead>
-          <p style={{ color: TEXT2, fontSize: 17, marginLeft: 14 }}>More tiles. More chances. Every draw.</p>
+          <p style={{ color: TEXT2, fontSize: 17, marginLeft: 14 }}>More tiles. More board positions. Every month.</p>
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 20, marginBottom: 60 }}>
@@ -543,17 +543,17 @@ function TierCards({ onNav }) {
                 <TileRow tier={tier} label="Monthly Draw Tiles"      count={tier.monthlyTiles} />
                 
                 {tier.bonusAccess && (
-                  <TileRow tier={tier} label="◇ Monthly Bonus Draw"    count={tier.bonusTiles} />
+                  <TileRow tier={tier} label="◇ Monthly Bonus Board"    count={tier.bonusTiles} />
                 )}
 
                 {!tier.bonusAccess && key==="bronze" && (
                   <div style={{ marginTop:8, background:BLUE_DIM, border:`1px solid ${BLUE_BORDER}`, borderRadius:8, padding:"8px 12px" }}>
-                    <div style={{ fontSize:11, color:GOLD, fontWeight:700 }}>◇ Upgrade to Gold for the exclusive $1,000,000 Gold Bonus Draw</div>
+                    <div style={{ fontSize:11, color:GOLD, fontWeight:700 }}>◇ Upgrade to Gold for the exclusive $1,000,000 Gold Member Board</div>
                   </div>
                 )}
                 {!tier.bonusAccess && key==="silver" && (
                   <div style={{ marginTop:8, background:BLUE_DIM, border:`1px solid ${BLUE_BORDER}`, borderRadius:8, padding:"8px 12px" }}>
-                    <div style={{ fontSize:11, color:GOLD, fontWeight:700 }}>◇ Upgrade to Gold for the exclusive $1,000,000 Gold Bonus Draw</div>
+                    <div style={{ fontSize:11, color:GOLD, fontWeight:700 }}>◇ Upgrade to Gold for the exclusive $1,000,000 Gold Member Board</div>
                   </div>
                 )}
               </div>
@@ -565,13 +565,13 @@ function TierCards({ onNav }) {
 
 
 
-        {/* Gold Bonus Draw callout */}
+        {/* Gold Bonus Board callout */}
         <div style={{ background:"linear-gradient(135deg, rgba(5,14,30,0.98), rgba(6,20,36,0.98))", border:"1px solid rgba(73,217,255,0.28)", borderRadius:18, overflow:"hidden", marginBottom:24 }}>
           <div style={{ background:"linear-gradient(90deg, rgba(9,28,54,0.98), rgba(5,18,34,0.98))", borderBottom:"1px solid rgba(73,217,255,0.22)", padding:"18px 28px", display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:12 }}>
             <div>
               <div style={{ fontSize:11, color:CHAMPAGNE, textTransform:"uppercase", letterSpacing:2.5, fontWeight:700, marginBottom:4 }}>Every Month — Gold Members Only</div>
-              <div style={{ fontSize:22, fontWeight:900, color:TEXT, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic" }}>$1,000,000 Gold Bonus Draw</div>
-              <div style={{ fontSize:13, color:TEXT2, marginTop:4 }}>10,000 LMCT+ Partner Vouchers — Gold members only. Included with your Gold subscription. No extra payment ever required.</div>
+              <div style={{ fontSize:22, fontWeight:900, color:TEXT, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic" }}>$1,000,000 Gold Member Board</div>
+              <div style={{ fontSize:13, color:TEXT2, marginTop:4 }}>10,000 LMCT+ Partner Vouchers — Gold members only. Included with your Gold subscription. Automatically included with Gold membership.</div>
             </div>
             <div style={{ background:"rgba(6,20,34,0.96)", border:"1px solid rgba(0,245,160,0.25)", borderRadius:14, padding:"14px 28px", textAlign:"center", flexShrink:0 }}>
               <div style={{ fontSize:10, color:CHAMPAGNE, textTransform:"uppercase", letterSpacing:1, marginBottom:4 }}>Prize Pool</div>
@@ -583,7 +583,7 @@ function TierCards({ onNav }) {
             <span style={{ fontSize:32 }}>🛒</span>
             <div>
               <div style={{ fontSize:16, fontWeight:900, color:CHAMPAGNE, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic" }}>LMCT+ Partner Voucher</div>
-              <div style={{ fontSize:13, color:TEXT3, marginTop:4 }}>10,000 winners — $100 each · Every Gold member has a meaningful chance of winning their membership back every month</div>
+              <div style={{ fontSize:13, color:TEXT3, marginTop:4 }}>10,000 winners — $100 each · Every Gold member has a meaningful monthly opportunity to receive member value back</div>
             </div>
           </div>
           <div style={{ padding:"12px 28px", borderTop:`1px solid ${BORDER}`, background:"rgba(3,12,24,0.96)", display:"flex", alignItems:"center", gap:10 }}>
@@ -606,9 +606,9 @@ function TierCards({ onNav }) {
           <div style={{ background:"rgba(6,14,28,0.96)", border:"1px solid rgba(127,145,173,0.24)", borderRadius:16, padding:"22px 24px", display:"flex", gap:14, alignItems:"flex-start" }}>
             <span style={{ fontSize:28, flexShrink:0 }}>₿</span>
             <div>
-              <div style={{ fontSize:15, fontWeight:900, color:STEEL, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", marginBottom:8 }}>Crypto Payments Supported</div>
+              <div style={{ fontSize:15, fontWeight:900, color:STEEL, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", marginBottom:8 }}>Payment Options Supported</div>
               <div style={{ fontSize:13, color:TEXT2, lineHeight:1.6 }}>
-                Pay with Bitcoin, Ethereum or USDT — same rules apply as cash. One membership per verified ID. Crypto is a payment method only — it doesn't change your entitlements.
+                Selected payment options can be supported — the same membership rules apply. One membership per verified ID. Alternative payment methods do not change membership entitlements.
               </div>
               <div style={{ display:"flex", gap:8, marginTop:12, flexWrap:"wrap" }}>
                 {["₿ Bitcoin","Ξ Ethereum","₮ USDT"].map(c=>(
@@ -1600,8 +1600,8 @@ function LiveDraw({ boardType, onNav, profile, onEditProfile, onDrawStateChange 
                     <div style={{ display:"flex", alignItems:"center", gap:8 }}>
                       <span style={{ fontSize:16 }}>★</span>
                       <div>
-                        <div style={{ fontSize:12, color:BLUE_BRIGHT, fontWeight:700 }}>$1M Gold Bonus Draw — Same Night</div>
-                        <div style={{ fontSize:11, color:TEXT3 }}>40 bonus tiles allocated · Gold members only · No extra payment</div>
+                        <div style={{ fontSize:12, color:BLUE_BRIGHT, fontWeight:700 }}>$1M Gold Bonus Board — Same Night</div>
+                        <div style={{ fontSize:11, color:TEXT3 }}>40 bonus tiles allocated · Gold members only · Automatically included with Gold membership</div>
                       </div>
                     </div>
                     <button onClick={()=>onNav("bonus")} style={{ background:BLUE_DIM, border:`1px solid ${BLUE_BORDER}`, borderRadius:8, padding:"6px 14px", color:BLUE_BRIGHT, fontSize:12, fontWeight:700, cursor:"pointer" }}>View →</button>
@@ -1918,7 +1918,7 @@ function WinnersPage({ onNav }) {
           <div style={{ marginTop:40, background:BLUE_DIM, border:`1px solid ${BLUE_BORDER}`, borderRadius:16, padding:"28px 32px", display:"flex", alignItems:"center", gap:24, flexWrap:"wrap" }}>
             <div style={{ flex:1 }}>
               <div style={{ fontSize:20, fontWeight:900, color:TEXT, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", textTransform:"uppercase", marginBottom:6 }}>Your name could be next.</div>
-              <div style={{ fontSize:14, color:TEXT2 }}>Every active LMCT+ member gets tiles on the board. Every month on a Saturday we give away $5,000,000 in prizes — 50 cars, 100 holidays, tech bundles, partner vouchers and $1,000,000 cash.</div>
+              <div style={{ fontSize:14, color:TEXT2 }}>Every active LMCT+ member gets tiles on the board. Every month on a Saturday the member board allocates $5,000,000 in prizes — 50 cars, 100 holidays, tech bundles, partner vouchers and $1,000,000 cash.</div>
             </div>
             <BlueBtn onClick={() => onNav("tiers")}>VIEW MEMBERSHIP TIERS →</BlueBtn>
           </div>
@@ -1965,9 +1965,9 @@ function getActiveTier(tilesSold) {
 }
 
 
-// ─── BONUS DRAW ───────────────────────────────────────────────────────────────
+// ─── BONUS BOARD ───────────────────────────────────────────────────────────────
 // Stable version: this page is intentionally self-contained so clicking the
-// Gold Bonus Draw button cannot crash the prototype before the draw starts.
+// Gold Bonus Board button cannot crash the prototype before the draw starts.
 function BonusDraw({ onNav, profile, onDrawStateChange, mainDrawActive = false }) {
   const safeTierKey = TIERS?.[profile?.tier] ? profile.tier : "gold";
   const tier = TIERS[safeTierKey] || TIERS.gold;
@@ -2198,7 +2198,7 @@ function BonusDraw({ onNav, profile, onDrawStateChange, mainDrawActive = false }
           <div style={{ maxWidth:720, background:"rgba(5,14,28,0.96)", border:`1px solid ${BLUE_BORDER}`, borderRadius:24, padding:46, textAlign:"center", boxShadow:"0 28px 90px rgba(0,0,0,0.55)" }}>
             <div style={{ fontSize:13, color:BLUE_BRIGHT, fontWeight:900, letterSpacing:3, textTransform:"uppercase", marginBottom:14 }}>Gold Bonus Board Queued</div>
             <div style={{ fontSize:36, color:TEXT, fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", marginBottom:12 }}>Starts After The Main Board</div>
-            <div style={{ color:TEXT2, lineHeight:1.7, margin:"0 auto 26px", maxWidth:560 }}>Gold members can switch to the bonus board now, but the exclusive bonus draw does not open until the Monthly Millionaire board is complete.</div>
+            <div style={{ color:TEXT2, lineHeight:1.7, margin:"0 auto 26px", maxWidth:560 }}>Gold members can switch to the bonus board now, but the exclusive bonus board does not open until the Monthly Millionaire board is complete.</div>
             <div style={{ display:"inline-flex", alignItems:"center", gap:12, background:"rgba(0,195,255,0.10)", border:`1px solid ${BLUE_BORDER}`, borderRadius:18, padding:"18px 34px", marginBottom:28 }}>
               <span style={{ color:TEXT3, fontSize:12, textTransform:"uppercase", letterSpacing:2 }}>Demo unlock in</span>
               <span style={{ color:BLUE_BRIGHT, fontSize:36, fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif" }}>{mm}:{ss}</span>
@@ -2218,7 +2218,7 @@ function BonusDraw({ onNav, profile, onDrawStateChange, mainDrawActive = false }
         <button onClick={() => onNav("draw")} style={{ background:"rgba(5,14,28,0.94)", border:`1px solid ${BLUE_BORDER}`, borderRadius:24, padding:"8px 18px", color:TEXT2, fontSize:13, fontWeight:900, cursor:"pointer", textTransform:"uppercase", letterSpacing:1.2 }}>Main Board</button>
         <button style={{ display:"flex", alignItems:"center", gap:9, background:"rgba(0,195,255,0.10)", border:`1px solid ${BLUE_BORDER}`, borderRadius:24, padding:"8px 18px", color:BLUE_BRIGHT, fontSize:13, fontWeight:900, textTransform:"uppercase", letterSpacing:1.5 }}>
           <span style={{ color:BLUE_BRIGHT }}>✦</span>
-          $1M Gold Bonus Draw
+          $1M Gold Bonus Board
         </button>
         <div style={{ marginLeft:"auto", display:"flex", gap:10, alignItems:"center", flexWrap:"wrap" }}>
           <div style={{ background:"rgba(0,195,255,0.08)", border:`1px solid ${BLUE_BORDER}`, borderRadius:20, padding:"5px 12px", fontSize:12, color:BLUE_BRIGHT, fontWeight:800 }}>● {liveViewers.toLocaleString()} watching</div>
@@ -2248,7 +2248,7 @@ function BonusDraw({ onNav, profile, onDrawStateChange, mainDrawActive = false }
           <div>
             <div style={{ background:"rgba(5,14,28,0.96)", border:`1px solid ${BLUE_BORDER}`, borderRadius:14, padding:"16px 20px", marginBottom:16, boxShadow:"0 18px 60px rgba(0,0,0,0.45)" }}>
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:10, gap:12 }}>
-                <span style={{ fontSize:12, color:TEXT2 }}>{drawState === "ready" ? "Gold Bonus Draw ready — all player tiles reset" : drawState === "complete" ? "Gold Bonus Draw complete" : "Gold Bonus Draw in progress"}</span>
+                <span style={{ fontSize:12, color:TEXT2 }}>{drawState === "ready" ? "Gold Bonus Board ready — all player tiles reset" : drawState === "complete" ? "Gold Bonus Board complete" : "Gold Bonus Board in progress"}</span>
                 <span style={{ fontSize:12, color:BLUE_BRIGHT, fontWeight:900 }}>{progress.toFixed(1)}%</span>
               </div>
               <div style={{ height:6, background:"rgba(255,255,255,0.06)", borderRadius:4, overflow:"hidden" }}>
@@ -2270,7 +2270,7 @@ function BonusDraw({ onNav, profile, onDrawStateChange, mainDrawActive = false }
 
             <div style={{ display:"flex", gap:12, flexWrap:"wrap", marginBottom:16 }}>
               {drawState === "ready" || drawState === "complete" ? (
-                <button onClick={drawState === "complete" ? resetDemoDraw : startDemoDraw} style={{ background:`linear-gradient(135deg, ${BLUE_BRIGHT}, ${BLUE})`, border:"none", borderRadius:10, padding:"14px 34px", color:TEXT, fontWeight:900, fontSize:16, cursor:"pointer", fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", boxShadow:`0 0 28px rgba(0,195,255,0.32)` }}>{drawState === "complete" ? "⟳ NEW DRAW" : "✦ START GOLD BONUS DRAW"}</button>
+                <button onClick={drawState === "complete" ? resetDemoDraw : startDemoDraw} style={{ background:`linear-gradient(135deg, ${BLUE_BRIGHT}, ${BLUE})`, border:"none", borderRadius:10, padding:"14px 34px", color:TEXT, fontWeight:900, fontSize:16, cursor:"pointer", fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", boxShadow:`0 0 28px rgba(0,195,255,0.32)` }}>{drawState === "complete" ? "⟳ NEW DRAW" : "✦ START GOLD BONUS BOARD"}</button>
               ) : (
                 <button onClick={() => { clearBonusTimer(); setDrawState("complete"); setSparkTiles(new Set()); onDrawStateChange?.(false); }} style={{ background:"transparent", border:"1px solid rgba(255,80,95,0.38)", borderRadius:10, padding:"14px 28px", color:"#FF6B7B", fontWeight:800, cursor:"pointer" }}>■ Stop</button>
               )}

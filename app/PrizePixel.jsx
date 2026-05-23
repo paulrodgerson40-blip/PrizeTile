@@ -2791,7 +2791,10 @@ function PasswordGate({ onUnlock }) {
 }
 
 export default function App() {
-  const [unlocked, setUnlocked] = useState(() => sessionStorage.getItem("pt_unlocked") === "1");
+  const [unlocked, setUnlocked] = useState(false);
+  useEffect(() => {
+    if (sessionStorage.getItem("pt_unlocked") === "1") setUnlocked(true);
+  }, []);
   const [page, setPage]             = useState("home");
   const [profile, setProfile]       = useState(DEFAULT_PROFILE);
   const [editingProfile, setEditingProfile] = useState(false);

@@ -2683,7 +2683,115 @@ function MobileWinnersPage() {
 // ─── ROOT ─────────────────────────────────────────────────────────────────────
 const DEFAULT_PROFILE = { id:"00001", name:"Paul R.", state:"VIC", tier:"gold", avatar:"🏁" };
 
+// ─── PASSWORD GATE ────────────────────────────────────────────────────────────
+function PasswordGate({ onUnlock }) {
+  const [val, setVal]     = useState("");
+  const [error, setError] = useState(false);
+  const [shake, setShake] = useState(false);
+
+  const attempt = () => {
+    if (val.trim().toLowerCase() === "lmct") {
+      sessionStorage.setItem("pt_unlocked", "1");
+      onUnlock();
+    } else {
+      setError(true);
+      setShake(true);
+      setVal("");
+      setTimeout(() => setShake(false), 500);
+    }
+  };
+
+  const onKey = (e) => { if (e.key === "Enter") attempt(); };
+
+  return (
+    <div style={{ position:"fixed", inset:0, background:"#02060D", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", zIndex:9999, padding:"24px" }}>
+      {/* Background rays */}
+      <div style={{ position:"absolute", inset:0, overflow:"hidden", pointerEvents:"none" }}>
+        <svg width="100%" height="100%" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="pg1" cx="50%" cy="0%" r="60%"><stop offset="0%" stopColor="#126BFF" stopOpacity="0.18"/><stop offset="100%" stopColor="#02060D" stopOpacity="0"/></radialGradient>
+            <linearGradient id="pg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#1060FF" stopOpacity="0.30"/><stop offset="100%" stopColor="#0057FF" stopOpacity="0"/></linearGradient>
+          </defs>
+          <rect width="1440" height="900" fill="url(#pg1)"/>
+          <polygon points="1440,0 1440,350 500,900 250,900" fill="url(#pg2)" opacity="0.6"/>
+        </svg>
+      </div>
+
+      <div style={{ position:"relative", width:"100%", maxWidth:380, textAlign:"center" }}>
+        {/* Logo */}
+        <div style={{ marginBottom:32 }}>
+          <LmctLogo height={44} />
+        </div>
+
+        {/* Card */}
+        <div style={{
+          background:"rgba(5,12,26,0.97)", border:`1px solid rgba(39,216,255,0.25)`,
+          borderRadius:18, padding:"36px 32px",
+          boxShadow:"0 0 60px rgba(18,107,255,0.18), 0 20px 60px rgba(0,0,0,0.6)",
+          backdropFilter:"blur(20px)",
+          animation: shake ? "pgShake 0.4s ease" : "none",
+        }}>
+          <div style={{ fontSize:13, color:BLUE_BRIGHT, textTransform:"uppercase", letterSpacing:3, fontWeight:700, marginBottom:8 }}>Private Demo</div>
+          <div style={{ fontSize:22, fontWeight:900, color:TEXT, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", marginBottom:6 }}>Enter Access Code</div>
+          <div style={{ fontSize:13, color:TEXT3, marginBottom:28 }}>This demo is password protected.</div>
+
+          <input
+            type="password"
+            value={val}
+            onChange={e => { setVal(e.target.value); setError(false); }}
+            onKeyDown={onKey}
+            placeholder="Password"
+            autoFocus
+            style={{
+              width:"100%", background:"rgba(2,6,13,0.90)",
+              border:`1px solid ${error ? "#FF3344" : "rgba(39,216,255,0.30)"}`,
+              borderRadius:10, padding:"13px 16px", fontSize:16,
+              color:TEXT, outline:"none", marginBottom:12,
+              fontFamily:"Arial,sans-serif", letterSpacing:2,
+              transition:"border-color 0.2s",
+            }}
+          />
+
+          {error && (
+            <div style={{ fontSize:12, color:"#FF3344", marginBottom:12, fontWeight:700 }}>
+              Incorrect password. Please try again.
+            </div>
+          )}
+
+          <button
+            onClick={attempt}
+            style={{
+              width:"100%", background:`linear-gradient(135deg,${BLUE},#0035BB)`,
+              border:"none", borderRadius:10, padding:"14px",
+              fontSize:14, fontWeight:900, color:TEXT, cursor:"pointer",
+              fontFamily:"'Arial Black',Arial,sans-serif", letterSpacing:1.5,
+              textTransform:"uppercase", boxShadow:`0 0 24px rgba(18,107,255,0.40)`,
+            }}
+          >
+            ENTER DEMO
+          </button>
+        </div>
+
+        <div style={{ fontSize:11, color:TEXT3, marginTop:20 }}>
+          prizetile.com.au · Confidential
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes pgShake {
+          0%,100%{transform:translateX(0)}
+          20%{transform:translateX(-8px)}
+          40%{transform:translateX(8px)}
+          60%{transform:translateX(-6px)}
+          80%{transform:translateX(6px)}
+        }
+      `}</style>
+    </div>
+  );
+}
+
 export default function App() {
+  const [unlocked, setUnlocked] = useState(() => sessionStorage.getItem("pt_unlocked") === "1");
   const [page, setPage]             = useState("home");
   const [profile, setProfile]       = useState(DEFAULT_PROFILE);
   const [editingProfile, setEditingProfile] = useState(false);
@@ -2693,6 +2801,8 @@ export default function App() {
   const onNav = (p) => setPage(p);
   const boardType = page.includes("monthly") ? "monthly" : "weekly";
   const isMobile = useIsMobile();
+
+  if (!unlocked) return <PasswordGate onUnlock={() => setUnlocked(true)} />;
 
   // ── Shared background + styles ──────────────────────────────────────────────
   const shellStyle = { fontFamily:"Arial, sans-serif", background:"radial-gradient(circle at 50% -18%, rgba(18,107,255,.10), transparent 34%), linear-gradient(180deg,#02060D 0%, #041020 48%, #02060D 100%)", minHeight:"100vh", position:"relative", overflowX:"hidden" };

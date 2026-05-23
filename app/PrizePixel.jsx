@@ -2489,62 +2489,146 @@ function MobileLanding({ onNav }) {
 function MobileTierCards({ onNav }) {
   return (
     <div style={{ padding:"24px 16px 60px" }}>
+
+      {/* Header */}
       <div style={{ marginBottom:28 }}>
-        <div style={{ fontSize:26, fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", textTransform:"uppercase", color:TEXT, letterSpacing:-0.5, marginBottom:6 }}>Membership Tiers</div>
-        <p style={{ color:"rgba(220,235,255,0.55)", fontSize:14 }}>More tiles. More board positions. Every month.</p>
+        <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:6 }}>
+          <div style={{ width:4, height:28, background:`linear-gradient(180deg,${BLUE_BRIGHT},${BLUE})`, borderRadius:2, boxShadow:`0 0 10px ${BLUE_BRIGHT}88` }} />
+          <div style={{ fontSize:26, fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", textTransform:"uppercase", color:TEXT, letterSpacing:-0.5 }}>Membership Tiers</div>
+        </div>
+        <p style={{ color:TEXT2, fontSize:14, marginLeft:16 }}>More tiles. More board positions. Every month.</p>
       </div>
+
+      {/* Tier cards */}
       {Object.entries(TIERS).map(([key, tier]) => {
         const isGold = key === "gold";
         return (
           <div key={key} style={{
-            background: isGold ? "rgba(10,18,30,0.95)" : "rgba(8,14,26,0.80)",
-            border: isGold ? `1.5px solid ${GOLD}55` : `1px solid rgba(98,168,255,0.15)`,
-            borderRadius:14, padding:"22px 20px", marginBottom:14, position:"relative",
-            boxShadow: isGold ? `0 0 40px rgba(107,232,255,0.08)` : "none",
+            background: isGold ? "rgba(5,14,28,0.98)" : "rgba(5,12,26,0.97)",
+            border: isGold ? `2px solid ${GOLD}55` : `1px solid ${BORDER}`,
+            borderRadius:16, padding:"26px 20px", marginBottom:14,
+            position:"relative", overflow:"hidden", backdropFilter:"blur(10px)",
+            boxShadow: isGold ? `0 0 50px rgba(39,216,255,0.12), 0 0 100px rgba(0,87,255,0.07)` : `0 0 30px rgba(0,87,255,0.05)`,
           }}>
+            {/* Most Popular banner */}
             {isGold && (
-              <div style={{ position:"absolute", top:0, right:0, background:`linear-gradient(135deg,${GOLD},rgba(107,232,255,0.8))`, color:NAVY, fontSize:10, fontWeight:900, padding:"5px 16px 5px 24px", clipPath:"polygon(16px 0,100% 0,100% 100%,0 100%)", letterSpacing:1.5, borderRadius:"0 14px 0 0" }}>MOST POPULAR</div>
+              <div style={{ position:"absolute", top:0, right:0, background:`linear-gradient(135deg,${BLUE_BRIGHT},${BLUE_SOFT})`, color:"#000", fontSize:10, fontWeight:900, padding:"6px 18px 6px 26px", clipPath:"polygon(16px 0,100% 0,100% 100%,0 100%)", fontFamily:"'Arial Black',Arial,sans-serif", letterSpacing:1.5 }}>MOST POPULAR</div>
             )}
-            <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:14 }}>
-              <div style={{ width:42, height:42, borderRadius:10, background:`${tier.color}22`, border:`1.5px solid ${tier.color}55`, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                <div style={{ width:16, height:16, borderRadius:3, background:tier.color, boxShadow:`0 0 10px ${tier.color}88` }} />
-              </div>
-              <div>
-                <div style={{ fontSize:20, fontWeight:900, color:TEXT, fontFamily:"'Arial Black',Arial,sans-serif" }}>{tier.name}</div>
-                <div style={{ fontSize:22, fontWeight:900, color:tier.color }}>${tier.price}<span style={{ fontSize:12, color:"rgba(220,235,255,0.45)", fontWeight:400 }}>/mo</span></div>
-              </div>
+
+            {/* Tier name + dot */}
+            <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:16 }}>
+              <div style={{ width:12, height:12, borderRadius:"50%", background:tier.color, boxShadow:`0 0 10px ${tier.glow}` }} />
+              <span style={{ fontSize:12, fontWeight:900, letterSpacing:2.5, textTransform:"uppercase", color:tier.color, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic" }}>{tier.name}</span>
             </div>
-            <div style={{ display:"flex", gap:8, marginBottom:14, flexWrap:"wrap" }}>
-              <div style={{ background:`rgba(98,168,255,0.10)`, border:`1px solid rgba(98,168,255,0.20)`, borderRadius:8, padding:"8px 14px", flex:1, textAlign:"center" }}>
-                <div style={{ fontSize:22, fontWeight:900, color:BLUE_BRIGHT, fontFamily:"'Arial Black',Arial,sans-serif" }}>{tier.monthlyTiles}</div>
-                <div style={{ fontSize:10, color:"rgba(220,235,255,0.45)", textTransform:"uppercase", letterSpacing:1.5, marginTop:2 }}>Tiles/Month</div>
-              </div>
-              {tier.bonusAccess && (
-                <div style={{ background:`rgba(107,232,255,0.08)`, border:`1px solid ${GOLD}33`, borderRadius:8, padding:"8px 14px", flex:1, textAlign:"center" }}>
-                  <div style={{ fontSize:22, fontWeight:900, color:GOLD, fontFamily:"'Arial Black',Arial,sans-serif" }}>{tier.bonusTiles}</div>
-                  <div style={{ fontSize:10, color:"rgba(220,235,255,0.45)", textTransform:"uppercase", letterSpacing:1.5, marginTop:2 }}>Bonus Tiles</div>
+
+            {/* Price */}
+            <div style={{ fontSize:52, fontWeight:900, color:TEXT, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", lineHeight:1, marginBottom:2 }}>${tier.price}</div>
+            <div style={{ fontSize:13, color:TEXT3, marginBottom:20 }}>per month</div>
+
+            {/* Divider */}
+            <div style={{ height:1, background:BORDER, marginBottom:20 }} />
+
+            {/* Tile visualisation */}
+            <div style={{ marginBottom:16 }}>
+              <div style={{ fontSize:11, color:TEXT3, marginBottom:8, textTransform:"uppercase", letterSpacing:1 }}>Monthly Draw Tiles</div>
+              <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                <div style={{ display:"flex", gap:3, flexWrap:"wrap", flex:1 }}>
+                  {Array.from({ length:Math.min(tier.monthlyTiles,20) }).map((_,i)=>(
+                    <div key={i} style={{ width:8, height:8, borderRadius:2, background:tier.color, opacity:0.75 }} />
+                  ))}
+                  {tier.monthlyTiles > 20 && <span style={{ fontSize:10, color:TEXT3, alignSelf:"center" }}>+{tier.monthlyTiles-20}</span>}
                 </div>
-              )}
+                <div style={{ fontSize:26, fontWeight:900, color:tier.color, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic" }}>{tier.monthlyTiles}</div>
+              </div>
             </div>
+
+            {/* Bonus tiles */}
             {tier.bonusAccess && (
-              <div style={{ background:`rgba(107,232,255,0.06)`, border:`1px solid ${GOLD}25`, borderRadius:8, padding:"10px 14px", marginBottom:14, display:"flex", alignItems:"center", gap:8 }}>
-                <span style={{ fontSize:16 }}>★</span>
-                <div>
-                  <div style={{ fontSize:12, color:GOLD, fontWeight:700 }}>Gold Bonus Draw</div>
-                  <div style={{ fontSize:11, color:"rgba(220,235,255,0.50)" }}>Exclusive monthly voucher draw — Gold members only</div>
+              <div style={{ marginBottom:16 }}>
+                <div style={{ fontSize:11, color:TEXT3, marginBottom:8, textTransform:"uppercase", letterSpacing:1 }}>◇ Monthly Bonus Board</div>
+                <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                  <div style={{ display:"flex", gap:3, flexWrap:"wrap", flex:1 }}>
+                    {Array.from({ length:Math.min(tier.bonusTiles,20) }).map((_,i)=>(
+                      <div key={i} style={{ width:8, height:8, borderRadius:2, background:GOLD, opacity:0.75 }} />
+                    ))}
+                    {tier.bonusTiles > 20 && <span style={{ fontSize:10, color:TEXT3, alignSelf:"center" }}>+{tier.bonusTiles-20}</span>}
+                  </div>
+                  <div style={{ fontSize:26, fontWeight:900, color:GOLD, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic" }}>{tier.bonusTiles}</div>
                 </div>
               </div>
             )}
-            <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:14 }}>
-              <span style={{ fontSize:13 }}>💳</span>
-              <span style={{ fontSize:12, color:"rgba(220,235,255,0.50)" }}>Cash · Card · Crypto accepted</span>
-            </div>
-            <button style={{ width:"100%", background: isGold ? `linear-gradient(135deg,${GOLD},rgba(107,232,255,0.8))` : `linear-gradient(135deg,${BLUE},#0035BB)`, border:"none", borderRadius:9, padding:"13px", fontSize:14, fontWeight:900, color: isGold ? NAVY : TEXT, cursor:"pointer", fontFamily:"'Arial Black',Arial,sans-serif", letterSpacing:1 }}>
-              {isGold ? "JOIN GOLD — $109.99/mo" : `JOIN ${tier.name.toUpperCase()} — $${tier.price}/mo`}
+
+            {/* Upgrade nudge for non-gold */}
+            {!tier.bonusAccess && (
+              <div style={{ background:BLUE_DIM, border:`1px solid ${BLUE_BORDER}`, borderRadius:8, padding:"8px 12px", marginBottom:16 }}>
+                <div style={{ fontSize:11, color:GOLD, fontWeight:700 }}>◇ Upgrade to Gold for the exclusive $1,000,000 Gold Member Board</div>
+              </div>
+            )}
+
+            {/* Join button */}
+            <button style={{
+              width:"100%", border:"none", borderRadius:10, padding:"14px",
+              fontSize:14, fontWeight:900, cursor:"pointer",
+              fontFamily:"'Arial Black',Arial,sans-serif", letterSpacing:1, textTransform:"uppercase",
+              background: isGold ? `linear-gradient(135deg,${BLUE_BRIGHT},${BLUE_SOFT})` : `linear-gradient(135deg,${BLUE},#0035BB)`,
+              color: isGold ? NAVY : TEXT,
+              boxShadow: isGold ? `0 0 20px rgba(39,216,255,0.3)` : `0 0 16px rgba(18,107,255,0.3)`,
+            }}>
+              JOIN {tier.name.toUpperCase()} — ${tier.price}/mo
             </button>
           </div>
         );
       })}
+
+      {/* Gold Bonus callout */}
+      <div style={{ background:"linear-gradient(135deg, rgba(5,14,30,0.98), rgba(6,20,36,0.98))", border:"1px solid rgba(73,217,255,0.28)", borderRadius:18, overflow:"hidden", marginBottom:16 }}>
+        <div style={{ background:"linear-gradient(90deg, rgba(9,28,54,0.98), rgba(5,18,34,0.98))", borderBottom:"1px solid rgba(73,217,255,0.22)", padding:"16px 18px" }}>
+          <div style={{ fontSize:11, color:CHAMPAGNE, textTransform:"uppercase", letterSpacing:2.5, fontWeight:700, marginBottom:4 }}>Every Month — Gold Members Only</div>
+          <div style={{ fontSize:20, fontWeight:900, color:TEXT, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", marginBottom:4 }}>$1,000,000 Gold Member Board</div>
+          <div style={{ fontSize:13, color:TEXT2, lineHeight:1.5 }}>10,000 LMCT+ Partner Vouchers given away exclusively to Gold members every month.</div>
+        </div>
+        <div style={{ padding:"14px 18px", display:"flex", alignItems:"center", gap:12 }}>
+          <span style={{ fontSize:28 }}>🛒</span>
+          <div>
+            <div style={{ fontSize:14, fontWeight:900, color:CHAMPAGNE, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic" }}>LMCT+ Partner Voucher</div>
+            <div style={{ fontSize:12, color:TEXT3, marginTop:3, lineHeight:1.4 }}>10,000 winners · $100 each · Every Gold member has a meaningful monthly opportunity to win their subscription value back</div>
+          </div>
+        </div>
+        <div style={{ padding:"10px 18px", borderTop:`1px solid ${BORDER}`, background:"rgba(3,12,24,0.96)", display:"flex", alignItems:"center", gap:8 }}>
+          <span style={{ fontSize:12 }}>★</span>
+          <span style={{ fontSize:12, color:CHAMPAGNE, fontWeight:700 }}>Gold members only · 40 bonus tiles · Upgrade to access this exclusive monthly draw</span>
+        </div>
+      </div>
+
+      {/* ID + Crypto cards */}
+      <div style={{ display:"flex", flexDirection:"column", gap:12, marginBottom:24 }}>
+        <div style={{ background:"rgba(5,12,26,0.97)", border:`1px solid rgba(39,216,255,0.18)`, borderRadius:14, padding:"18px 18px", display:"flex", gap:14, alignItems:"flex-start" }}>
+          <span style={{ fontSize:26, flexShrink:0 }}>ID</span>
+          <div>
+            <div style={{ fontSize:14, fontWeight:900, color:BLUE_BRIGHT, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", marginBottom:6 }}>Verified Membership</div>
+            <div style={{ fontSize:12, color:TEXT2, lineHeight:1.6 }}>Each membership is linked to a verified identity. One account per person — no exceptions. Identity verified at sign-up so prizes are paid fast.</div>
+          </div>
+        </div>
+        <div style={{ background:"rgba(6,14,28,0.96)", border:`1px solid rgba(127,145,173,0.24)`, borderRadius:14, padding:"18px 18px", display:"flex", gap:14, alignItems:"flex-start" }}>
+          <span style={{ fontSize:26, flexShrink:0 }}>₿</span>
+          <div>
+            <div style={{ fontSize:14, fontWeight:900, color:STEEL, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", marginBottom:6 }}>Payment Options</div>
+            <div style={{ fontSize:12, color:TEXT2, lineHeight:1.6, marginBottom:10 }}>Selected payment options supported. Same membership rules apply — one membership per verified ID.</div>
+            <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+              {["₿ Bitcoin","Ξ Ethereum","₮ USDT"].map(c=>(
+                <div key={c} style={{ background:"rgba(10,22,40,0.96)", border:"1px solid rgba(127,145,173,0.30)", borderRadius:20, padding:"4px 12px", fontSize:11, fontWeight:700, color:STEEL }}>{c}</div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* CTA */}
+      <div style={{ textAlign:"center" }}>
+        <button onClick={() => onNav("home")} style={{ background:`linear-gradient(135deg,${BLUE},#0035BB)`, border:"none", borderRadius:10, padding:"14px 32px", fontSize:14, fontWeight:900, color:TEXT, cursor:"pointer", fontFamily:"'Arial Black',Arial,sans-serif", letterSpacing:1, textTransform:"uppercase", boxShadow:`0 0 24px rgba(18,107,255,0.35)` }}>
+          BACK TO HOME →
+        </button>
+      </div>
     </div>
   );
 }

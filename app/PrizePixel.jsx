@@ -482,7 +482,7 @@ function Landing({ onNav }) {
               </div>
               <div style={{ padding:"24px" }}>
                 <div style={{ fontSize:46, color:GREEN, fontWeight:900, fontFamily:"'Arial Black',Arial,sans-serif", fontStyle:"italic", textShadow:"0 0 28px rgba(0,245,160,.32)" }}>$1M</div>
-                <div style={{ color:TEXT2, lineHeight:1.6, fontSize:14, marginTop:8 }}>10,000 partner voucher winners every month. Included with Gold. Automatically included with Gold membership.</div>
+                <div style={{ color:TEXT2, lineHeight:1.6, fontSize:14, marginTop:8 }}>10,000 partner voucher winners every month. Automatically included with Gold membership.</div>
               </div>
             </div>
           </div>
